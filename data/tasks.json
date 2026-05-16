@@ -1,0 +1,44 @@
+{
+  "daily": [
+    {
+      "id": "d1",
+      "text": "Review morning emails",
+      "done": false
+    },
+    {
+      "id": "d2",
+      "text": "Stand-up meeting 10am",
+      "done": false
+    },
+    {
+      "id": "d3",
+      "text": "Code review for PR #42",
+      "done": false
+    },
+    {
+      "id": "d7c5f0f4",
+      "text": "sss",
+      "done": true
+    }
+  ],
+  "weekly": [
+    {
+      "id": "w1",
+      "text": "Finish project proposal",
+      "done": true
+    },
+    {
+      "id": "w2",
+      "text": "Update documentation",
+      "done": false
+    },
+    {
+      "id": "w3",
+      "text": "1-on-1 with manager",
+      "done": false
+    }
+  ],
+  "notes": "Sprint ends Friday. Don't forget to push final commits before EOD.",
+  "theme": "abstract",
+  "resolution": "1920x1080"
+}
