@@ -10,7 +10,7 @@ const Header = ({
   return (
     <header className="sticky top-0 z-10 flex justify-between items-center px-9 py-5 border-b border-indigo-500/15 bg-[#0e0e1e]/90 backdrop-blur-md">
       <div className="font-mono text-xl font-bold tracking-tight">
-        Wall<span className="text-indigo-500">Craft</span>
+       Daily Task Genshin Wall<span className="text-indigo-500">Paper</span>
       </div>
       <div className="flex gap-2.5 items-center">
         {/* Auth Section */}
