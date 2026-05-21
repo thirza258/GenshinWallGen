@@ -1,0 +1,28 @@
+{
+  "daily": [
+    {
+      "id": "mpfktasdco977ia30ho",
+      "text": "HELLLo",
+      "done": true
+    },
+    {
+      "id": "mpfkteyq6ori1ssygly",
+      "text": "EHHHL",
+      "done": false
+    }
+  ],
+  "weekly": [
+    {
+      "id": "mpfkti7xhhw3esa0v8e",
+      "text": "HHHHHHH",
+      "done": false
+    },
+    {
+      "id": "mpfktlbhnrx3n6x23r",
+      "text": "HHHHHH",
+      "done": false
+    }
+  ],
+  "notes": "aaaaa",
+  "resolution": "1920x1080"
+}
