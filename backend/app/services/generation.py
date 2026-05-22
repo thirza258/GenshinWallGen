@@ -29,7 +29,7 @@ def generate_and_upload_for_user(tasks_data: dict):
     ts = datetime.now().isoformat()
     return {
         "status": "ok",
-        "path": "/api/wallpaper/latest",   # local proxy endpoint
+        "path": "/wallpaper/latest", 
         "elapsed": elapsed,
         "generated_at": ts,
     }

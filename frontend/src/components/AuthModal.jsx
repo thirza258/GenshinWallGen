@@ -6,12 +6,14 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess, addToast }) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8009';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    const endpoint = isLogin ? '/api/login' : '/api/register';
+    const endpoint = isLogin ? '/login' : '/register';
     try {
-      const response = await fetch(`http://localhost:8009${endpoint}`, {
+      const response = await fetch(`${BACKEND_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),

@@ -10,7 +10,7 @@ const generateId = () =>
   Date.now().toString(36) + Math.random().toString(36).substring(2);
 
 const App = () => {
-  const BACKEND_URL = "http://localhost:8009";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8009";
 
   const [dailyTasks, setDailyTasks] = useState([]);
   const [weeklyTasks, setWeeklyTasks] = useState([]);
@@ -94,7 +94,7 @@ const App = () => {
         notes,
         resolution,
       };
-      const response = await authFetch("/api/tasks", {
+      const response = await authFetch("/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -130,7 +130,7 @@ const App = () => {
     try {
       let response;
       if (isAuthenticated) {
-        response = await authFetch("/api/generate", { method: "POST" });
+        response = await authFetch("/generate", { method: "POST" });
       } else {
         // Send current tasks in request body
         const payload = {
@@ -139,7 +139,7 @@ const App = () => {
           notes,
           resolution,
         };
-        response = await fetch("http://localhost:8009/api/anonymous/generate", {
+        response = await fetch(`${BACKEND_URL}/anonymous/generate`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -147,7 +147,7 @@ const App = () => {
       }
       const data = await response.json();
       if (response.ok) {
-        setImageUrl(`http://localhost:8009${data.path}?t=${Date.now()}`);
+        setImageUrl(`${BACKEND_URL}${data.path}?t=${Date.now()}`);
         setDownloadEnabled(true);
         addToast(`Wallpaper generated in ${data.elapsed}s`, "success");
         setStatusMsg(
@@ -176,7 +176,7 @@ const App = () => {
 
   const downloadWallpaper = async () => {
     try {
-      const response = await fetch("http://localhost:8009/api/download");
+      const response = await fetch(`${BACKEND_URL}/download`);
       if (!response.ok) throw new Error("Download failed");
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
@@ -240,7 +240,7 @@ const App = () => {
     
     if (isAuthenticated) {
       try {
-        const response = await authFetch("/api/tasks");
+        const response = await authFetch("/tasks");
         const data = await response.json();
         setDailyTasks(data.daily || []);
         setWeeklyTasks(data.weekly || []);
@@ -265,10 +265,10 @@ const App = () => {
       }
     }
     try {
-      const res = await fetch(`${BACKEND_URL}/api/status`);
+      const res = await fetch(`${BACKEND_URL}/status`);
       const data = await res.json();
       if (data.has_wallpaper) {
-        setImageUrl(`${BACKEND_URL}/api/wallpaper/latest?t=${Date.now()}`);
+        setImageUrl(`${BACKEND_URL}/wallpaper/latest?t=${Date.now()}`);
         setDownloadEnabled(true);
         setStatusMsg(`Last generated: ${new Date(data.last_modified).toLocaleTimeString()}`);
       }

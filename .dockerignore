@@ -1,0 +1,10 @@
+# Exclude source directory (large files, not needed in image)
+source/
+
+# Also exclude other dev files
+__pycache__/
+*.pyc
+.git/
+.env  # but we'll mount it as env_file, so don't copy
+data/   # exclude data directory – will be a volume
+static/  # exclude static outputs – will be a volume
