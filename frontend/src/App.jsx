@@ -264,17 +264,7 @@ const App = () => {
         setResolution("1920x1080");
       }
     }
-    try {
-      const res = await fetch(`${BACKEND_URL}/status`);
-      const data = await res.json();
-      if (data.has_wallpaper) {
-        setImageUrl(`${BACKEND_URL}/wallpaper/latest?t=${Date.now()}`);
-        setDownloadEnabled(true);
-        setStatusMsg(`Last generated: ${new Date(data.last_modified).toLocaleTimeString()}`);
-      }
-    } catch (err) {
-      console.warn("Could not check wallpaper status", err);
-    }
+    
 
     setIsLoadingInitial(false);
   };
