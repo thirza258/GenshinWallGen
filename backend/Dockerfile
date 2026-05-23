@@ -22,4 +22,4 @@ RUN mkdir -p /app/data /app/static /app/source
 ENV PYTHONPATH=/app
 
 # Run migrations and start uvicorn
-CMD ["sh", "-c", "cd /app/backend && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8009"]
+CMD ["sh", "-c", "cd /app/backend && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8009"]

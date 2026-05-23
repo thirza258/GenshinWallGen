@@ -52,7 +52,7 @@ def wrap_text(text: str, font, max_width: int, draw: ImageDraw.ImageDraw) -> lis
 
 # ─── Background Generators ───────────────────────────────────────────────────
 
-def load_wallpaper_source(w: int, h: int) -> Image.Image:
+def load_wallpaper_source(w: int, h: int, image_id: str = None) -> Image.Image:
     candidates = list(WALLPAPER_SOURCE.glob("*.jpg")) + list(WALLPAPER_SOURCE.glob("*.png"))
     if not candidates:
         return None
@@ -63,6 +63,7 @@ def load_wallpaper_source(w: int, h: int) -> Image.Image:
         return img
     except Exception:
         return None
+
 
 
 # ─── Font Loading ─────────────────────────────────────────────────────────────
