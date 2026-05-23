@@ -20,6 +20,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess, addToast }) => {
       });
       const data = await response.json();
       if (response.ok) {
+        
         localStorage.setItem('token', data.access_token);
         onLoginSuccess(data.access_token);
         addToast(`${isLogin ? 'Logged in' : 'Registered'} successfully`, 'success');
