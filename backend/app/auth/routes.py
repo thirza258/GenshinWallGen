@@ -25,11 +25,6 @@ def register(user: schemas.UserCreate, db: Session = Depends(dependencies.get_db
 @router.post("/login", response_model=schemas.Token)
 def login(user: schemas.UserLogin, db: Session = Depends(dependencies.get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
-    
-    print("INPUT USERNAME:", user.username)
-    print("DB USER:", db_user)
-    
-    
     if not db_user or not utils.verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     access_token = utils.create_access_token(data={"sub": db_user.username})
