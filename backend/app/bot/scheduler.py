@@ -26,7 +26,8 @@ def daily_wallpaper_job():
     try:
 
         # your constant user
-        user = db.query(User).first()
+        username = "admin"
+        user = db.query(User).filter(User.username == username).first()
 
         if not user:
             print("No user found")
@@ -38,6 +39,7 @@ def daily_wallpaper_job():
         )
 
         image_url = result["path"]
+        print(f"Generated wallpaper URL: {image_url}")
 
         send_whatsapp_image(
             PHONE_NUMBER,
@@ -55,19 +57,19 @@ def daily_wallpaper_job():
 
 def start_scheduler():
 
-    # scheduler.add_job(
-    #     daily_wallpaper_job,
-    #     trigger="cron",
-    #     hour=8,
-    #     minute=0,
-    #     id="daily_wallpaper"
-    # )
-
     scheduler.add_job(
         daily_wallpaper_job,
-        trigger="interval",
-        minutes=1,
-        id="daily_wallpaper_test"
+        trigger="cron",
+        hour=8,
+        minute=0,
+        id="daily_wallpaper"
     )
+
+    # scheduler.add_job(
+    #     daily_wallpaper_job,
+    #     trigger="interval",
+    #     minutes=1,
+    #     id="daily_wallpaper_test"
+    # )
     
     scheduler.start()
