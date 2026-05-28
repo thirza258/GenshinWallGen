@@ -16,8 +16,31 @@ def send_whatsapp_image(to: str, image_url: str):
         "Content-Type": "application/json",
     }
 
-    payload = { "messaging_product": "whatsapp", "to": to, "type": "image", "image": { "link": image_url, "caption": "Today's wallpaper ✨" } }
-
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": to,
+        "type": "template",
+        "template": {
+            "name": "daily_wallpaper",
+            "language": {
+                "code": "en_US"
+            },
+            "components": [
+                {
+                    "type": "header",
+                    "parameters": [
+                        {
+                            "type": "image",
+                            "image": {
+                                "link": image_url
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+     
     r = requests.post(url, headers=headers, json=payload)
 
     print(r.status_code)

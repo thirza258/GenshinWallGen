@@ -62,7 +62,10 @@ def start_scheduler():
         trigger="cron",
         hour=8,
         minute=0,
-        id="daily_wallpaper"
+        id="daily_wallpaper",
+        misfire_grace_time=300,
+        coalesce=True,
+        max_instances=1,
     )
 
     # scheduler.add_job(
