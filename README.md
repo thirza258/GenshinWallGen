@@ -1,79 +1,86 @@
-# WallCraft — Wallpaper Generator
+# GenshinWallCraft
 
-A FastAPI + Pillow app to generate beautiful task-overlay desktop wallpapers.
+GenshinWallCraft generates task-overlay wallpapers from the artwork in `source/` and lets you use them in two modes:
 
-## Setup
+- Anonymous mode for quick generation and download
+- Authenticated mode with saved tasks, history, and private downloads
+
+The stack is designed to run with Docker Compose only. No manual database setup and no separate MinIO install are required.
+
+## What Runs In Compose
+
+- `frontend` - React app served by Nginx on `http://localhost:5155`
+- `backend` - FastAPI app on `http://localhost:8009`
+- `minio` - local object storage on `http://localhost:9000` with console on `http://localhost:9001`
+
+Generated wallpapers and app data are stored in Docker volumes, so they survive container restarts.
+
+## Self Deploy
+
+### Prerequisites
+
+- Docker
+- Docker Compose
+
+### Start the stack
 
 ```bash
-# 1. Install dependencies
-pip install -r requirements.txt
-
-# 2. Run the server
-uvicorn main:app --reload --port 8000
-
-# 3. Open in browser
-# http://localhost:8000
+docker compose up -d --build
 ```
 
-## Project Structure
+The first run can take a few minutes because Docker needs to build both images and install Python and Node dependencies.
 
-```
-wallpaper-gen/
-├── main.py              # FastAPI routes
-├── wallpaper_gen.py     # Pillow image generation logic
-├── requirements.txt
-├── data/
-│   └── tasks.json       # Task & config storage
-├── static/
-│   └── wallpaper.png    # Generated output
-└── templates/
-    └── index.html       # Frontend UI
-```
+### Open the app
 
-## API Endpoints
+- Main UI: `http://localhost:5155`
+- MinIO console: `http://localhost:9001`
 
-| Method | Path           | Description                      |
-|--------|----------------|----------------------------------|
-| GET    | /              | Serve the UI                     |
-| GET    | /api/tasks     | Get current tasks & settings     |
-| POST   | /api/tasks     | Save tasks & settings            |
-| POST   | /api/generate  | Generate wallpaper image         |
-| GET    | /api/download  | Download the generated PNG       |
-| GET    | /api/status    | Check if a wallpaper exists      |
+MinIO uses these default credentials in the compose file:
 
-## Background Themes
+- Username: `wallcraft`
+- Password: `wallcraft123`
 
-- **gradient** — smooth vertical colour gradient
-- **abstract** — gradient + floating glowing circles + lines
-- **mesh** — blurred blob mesh (great for soft, modern look)
+### Stop the stack
 
-## Auto-scheduling (optional)
-
-Add to `main.py` to regenerate every hour:
-
-```python
-from apscheduler.schedulers.background import BackgroundScheduler
-
-scheduler = BackgroundScheduler()
-scheduler.add_job(generate_wallpaper, 'interval', hours=1)
-scheduler.start()
+```bash
+docker compose down
 ```
 
-## Set as Desktop Wallpaper (optional)
+## How To Use
 
-After generating, call this from your system:
+1. Open the web UI in your browser.
+2. Add daily and weekly tasks.
+3. Choose a background image and resolution.
+4. Click generate.
+5. Download the wallpaper or sign in to keep your tasks and image history on the backend.
 
-```python
-# macOS
-import subprocess
-subprocess.run(["osascript", "-e",
-  'tell app "Finder" to set desktop picture to POSIX file "/path/to/wallpaper.png"'])
+Anonymous users can generate and download without registering. Authenticated users can register, log in, save task state, and download the latest stored wallpaper.
 
-# Windows
-import ctypes
-ctypes.windll.user32.SystemParametersInfoW(20, 0, r"C:\path\to\wallpaper.png", 3)
+## Environment Notes
 
-# Linux (GNOME)
-subprocess.run(["gsettings", "set", "org.gnome.desktop.background", "picture-uri",
-  "file:///path/to/wallpaper.png"])
+The compose file already wires the local services together. You normally do not need to edit anything for a self-hosted run.
+
+Useful values to know:
+
+- Backend uses SQLite at `backend/wallcraft.db` inside the container
+- MinIO stores wallpapers in the `wallpapers` bucket
+- Backend can still read optional WhatsApp settings from `backend/.env`
+
+If you want to customize storage, credentials, or the WhatsApp scheduler later, edit `docker-compose.yml` and the backend environment values there.
+
+## Project Layout
+
+```text
+.
+├── backend/
+├── frontend/
+├── source/
+├── docker-compose.yml
+└── README.md
 ```
+
+## Notes
+
+- The frontend talks to the backend through the `/api` path in the Nginx config.
+- The backend creates the MinIO bucket on demand.
+- The daily WhatsApp job is optional and only matters if you configure the WhatsApp environment variables.
