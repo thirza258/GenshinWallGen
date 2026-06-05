@@ -56,13 +56,33 @@ def load_wallpaper_source(w: int, h: int, image_id: str = None) -> Image.Image:
     candidates = list(WALLPAPER_SOURCE.glob("*.jpg")) + list(WALLPAPER_SOURCE.glob("*.png"))
     if not candidates:
         return None
-    path = random.choice(candidates)
+
+    if image_id and image_id != "random":
+        # Find the specific image by filename
+        target = WALLPAPER_SOURCE / image_id
+        if target.exists() and target.suffix.lower() in (".jpg", ".png"):
+            path = target
+        else:
+            # Fallback to random if specified image not found
+            path = random.choice(candidates)
+    else:
+        path = random.choice(candidates)
+
     try:
         img = Image.open(path).convert("RGB")
         img = ImageOps.fit(img, (w, h), method=Image.LANCZOS)
         return img
     except Exception:
         return None
+
+
+def list_source_images() -> list[str]:
+    """Return sorted list of available source image filenames."""
+    candidates = sorted(
+        list(WALLPAPER_SOURCE.glob("*.jpg")) + list(WALLPAPER_SOURCE.glob("*.png")),
+        key=lambda p: p.name,
+    )
+    return [p.name for p in candidates]
 
 
 
@@ -237,10 +257,11 @@ def generate_wallpaper(tasks_data: dict | None = None) -> Path:
         data = tasks_data
 
     resolution_str = data.get('resolution', '1920x1080')
+    image_id = data.get('image_id', '')
     w, h = parse_resolution(resolution_str)
 
     # Load base image and convert to RGBA ONCE
-    img = load_wallpaper_source(w, h)
+    img = load_wallpaper_source(w, h, image_id=image_id)
     if img is None:
         print("No wallpaper source found, falling back to generated background")
         img = Image.new("RGB", (w, h), color=(20, 25, 40))

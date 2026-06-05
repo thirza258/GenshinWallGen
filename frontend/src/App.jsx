@@ -18,6 +18,7 @@ const App = () => {
   const [weeklyTasks, setWeeklyTasks] = useState([]);
   const [notes, setNotes] = useState("");
   const [resolution, setResolution] = useState("1920x1080");
+  const [selectedImage, setSelectedImage] = useState("random");
   const [imageUrl, setImageUrl] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -41,10 +42,11 @@ const App = () => {
           weekly: weeklyTasks,
           notes,
           resolution,
+          image_id: selectedImage,
         }),
       );
     }
-  }, [dailyTasks, weeklyTasks, notes, resolution, isAuthenticated]);
+  }, [dailyTasks, weeklyTasks, notes, resolution, selectedImage, isAuthenticated]);
 
   const addToast = useCallback((message, type = "info") => {
     const id = generateId();
@@ -74,6 +76,7 @@ const App = () => {
     setWeeklyTasks([]);
     setNotes("");
     setResolution("1920x1080");
+    setSelectedImage("random");
   }, [addToast]);
 
   const authFetch = useCallback(
@@ -108,6 +111,7 @@ const App = () => {
         weekly: weeklyTasks,
         notes,
         resolution,
+        image_id: selectedImage,
       };
       const response = await authFetch("/tasks", {
         method: "POST",
@@ -132,6 +136,7 @@ const App = () => {
     weeklyTasks,
     notes,
     resolution,
+    selectedImage,
     isAuthenticated,
     authFetch,
     addToast,
@@ -181,6 +186,7 @@ const generateWallpaper = useCallback(async () => {
         weekly: weeklyTasks,
         notes,
         resolution,
+        image_id: selectedImage,
       };
       const generateResponse = await fetch(`${BACKEND_URL}/anonymous/generate`, {
         method: "POST",
@@ -225,6 +231,7 @@ const generateWallpaper = useCallback(async () => {
   weeklyTasks,
   notes,
   resolution,
+  selectedImage,
   saveStateToBackend,
   authFetch,
   addToast,
@@ -296,6 +303,7 @@ const generateWallpaper = useCallback(async () => {
       setWeeklyTasks((prev) => prev.filter((_, i) => i !== idx));
     }
   };
+  const handleImageChange = (e) => setSelectedImage(e.target.value);
 
   // Load initial data (tasks from backend or localStorage)
   useEffect(() => {
@@ -309,6 +317,7 @@ const generateWallpaper = useCallback(async () => {
           setWeeklyTasks(data.weekly || []);
           setNotes(data.notes || "");
           setResolution(data.resolution || "1920x1080");
+          setSelectedImage(data.image_id || "random");
         } catch (err) {
           console.warn("Could not load tasks from backend", err);
         }
@@ -320,6 +329,7 @@ const generateWallpaper = useCallback(async () => {
           setWeeklyTasks(data.weekly || []);
           setNotes(data.notes || "");
           setResolution(data.resolution || "1920x1080");
+          setSelectedImage(data.image_id || "random");
         }
       }
       setIsLoadingInitial(false);
@@ -363,6 +373,8 @@ const generateWallpaper = useCallback(async () => {
           onNotesChange={(e) => setNotes(e.target.value)}
           resolution={resolution}
           onResolutionChange={(e) => setResolution(e.target.value)}
+          selectedImage={selectedImage}
+          onImageChange={handleImageChange}
           onDownload={downloadWallpaper}
           downloadEnabled={downloadEnabled}
         />

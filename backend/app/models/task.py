@@ -22,3 +22,4 @@ class TasksPayload(BaseModel):
     weekly: List[Task] = []
     notes: str = ""
     resolution: str = "1920x1080"
+    image_id: str = "" 

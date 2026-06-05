@@ -18,6 +18,8 @@ const Sidebar = ({
   onNotesChange,
   resolution,
   onResolutionChange,
+  selectedImage,
+  onImageChange,
   onDownload,
   downloadEnabled,
 }) => {
@@ -42,7 +44,12 @@ const Sidebar = ({
         addInputId="weekly-input"
       />
       <NotesSection notes={notes} onNotesChange={onNotesChange} />
-      <SettingsSection resolution={resolution} onResolutionChange={onResolutionChange} />
+      <SettingsSection
+        resolution={resolution}
+        onResolutionChange={onResolutionChange}
+        selectedImage={selectedImage}
+        onImageChange={onImageChange}
+      />
       <button
         onClick={onDownload}
         disabled={!downloadEnabled}

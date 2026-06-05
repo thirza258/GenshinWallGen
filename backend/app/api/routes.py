@@ -13,6 +13,7 @@ from app.auth.dependencies import get_current_user, get_db
 from app.auth.models import User
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import wallpaper_gen
 
 router = APIRouter()
 
@@ -22,6 +23,11 @@ async def serve_ui():
     if not html_file.exists():
         html_file = Path(__file__).parent.parent / "templates" / "index.html"
     return HTMLResponse(html_file.read_text())
+
+@router.get("/api/source-images")
+async def get_source_images():
+    images = wallpaper_gen.list_source_images()
+    return {"images": images}
 
 @router.get("/api/tasks")
 async def get_tasks(current_user: User = Depends(get_current_user)):
