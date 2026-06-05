@@ -7,10 +7,15 @@ from app.config import AppConfig
 from app.api.routes import router
 from app.auth.routes import router as auth_router
 from app.bot.scheduler import start_scheduler
+from wallpaper_gen import  preload_backgrounds
 
+
+        
+        
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     start_scheduler()
+    preload_backgrounds(1920, 1080)
     yield
     # shutdown
     print("Application shutting down")

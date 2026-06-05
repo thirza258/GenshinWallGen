@@ -1,20 +1,52 @@
 services:
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-wallcraft}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-wallcraft123}
+    volumes:
+      - minio-data:/data
+    restart: unless-stopped
+
   backend:
     build:
-      context: .                # project root as context
+      context: .
       dockerfile: backend/Dockerfile
     ports:
-      - "8009:8009"
+      - "${BACKEND_PORT:-8009}:8009"
     env_file:
-      - backend/.env           # or root .env if you have one
+      - .env
     environment:
-      - PYTHONUNBUFFERED=1
+      PYTHONUNBUFFERED: 1
+
+      # Security
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+
+      # Database
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-wallcraft}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+
+      # MinIO
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-http://localhost:9000}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-wallcraft}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-wallcraft123}
+      MINIO_BUCKET: ${MINIO_BUCKET:-wallpapers}
+      MINIO_SECURE: ${MINIO_SECURE:-False}
+
     volumes:
-      # Persist data and static files
       - backend-data:/app/data
       - backend-static:/app/static
-      # Mount source folder (read-only is fine if only reading)
       - ./source:/app/source:ro
+    depends_on:
+      - minio
     restart: unless-stopped
 
   frontend:
@@ -22,13 +54,14 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_BACKEND_URL=/api
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL:-/api}
     ports:
-      - "5155:80"
+      - "${FRONTEND_PORT:-5155}:80"
     depends_on:
       - backend
     restart: unless-stopped
 
 volumes:
+  minio-data:
   backend-data:
   backend-static:

@@ -9,6 +9,30 @@ import AuthModal from "./components/AuthModal";
 const generateId = () =>
   Date.now().toString(36) + Math.random().toString(36).substring(2);
 
+const GENERATION_TIMEOUT = 10 * 60 * 1000; // 10 minutes
+
+/**
+ * Wraps fetch() with an AbortController that aborts after `timeout` ms.
+ * Pass `timeout` in the options; it is stripped before the real fetch.
+ */
+const fetchWithTimeout = (url, options = {}) => {
+  const { timeout, ...fetchOptions } = options;
+  if (!timeout) return fetch(url, fetchOptions);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+  // Merge the abort signal with any caller-supplied signal
+  const existingSignal = fetchOptions.signal;
+  if (existingSignal) {
+    existingSignal.addEventListener("abort", () => controller.abort());
+  }
+
+  return fetch(url, {
+    ...fetchOptions,
+    signal: controller.signal,
+  }).finally(() => clearTimeout(timer));
+};
+
 const App = () => {
   const BACKEND_URL =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:8009/api";
@@ -87,7 +111,7 @@ const App = () => {
         ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
       };
-      const response = await fetch(`${BACKEND_URL}${url}`, {
+      const response = await fetchWithTimeout(`${BACKEND_URL}${url}`, {
         ...options,
         headers,
       });
@@ -162,12 +186,12 @@ const generateWallpaper = useCallback(async () => {
     let generationResult;
 
     if (isAuthenticated) {
-      response = await authFetch("/generate", { method: "POST" });
+      response = await authFetch("/generate", { method: "POST", timeout: GENERATION_TIMEOUT });
       generationResult = await response.json();
       if (!response.ok) throw new Error(generationResult.detail || "Generation failed");
 
       // Fetch the latest image blob (authenticated)
-      const imageResponse = await authFetch("/wallpaper/latest");
+      const imageResponse = await authFetch("/wallpaper/latest", { timeout: GENERATION_TIMEOUT });
       if (!imageResponse.ok) throw new Error("Failed to fetch wallpaper");
 
       // Revoke the old blob URL if it exists (prevents memory leaks)
@@ -188,17 +212,18 @@ const generateWallpaper = useCallback(async () => {
         resolution,
         image_id: selectedImage,
       };
-      const generateResponse = await fetch(`${BACKEND_URL}/anonymous/generate`, {
+      const generateResponse = await fetchWithTimeout(`${BACKEND_URL}/anonymous/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        timeout: GENERATION_TIMEOUT,
       });
       const generateData = await generateResponse.json();
       if (!generateResponse.ok) throw new Error(generateData.detail || "Generation failed");
 
       // --- Now fetch the newly generated image as a Blob ---
       // Append a timestamp to bypass any browser cache on the fetch request itself.
-      const imageResponse = await fetch(`${BACKEND_URL}/anonymous/download?t=${Date.now()}`);
+      const imageResponse = await fetchWithTimeout(`${BACKEND_URL}/anonymous/download?t=${Date.now()}`, { timeout: GENERATION_TIMEOUT });
       if (!imageResponse.ok) throw new Error("Failed to fetch wallpaper");
 
       // Revoke the old blob URL if it exists (prevents memory leaks)
@@ -339,14 +364,14 @@ const generateWallpaper = useCallback(async () => {
 
   if (isLoadingInitial) {
     return (
-      <div className="min-h-screen bg-[#07070f] flex items-center justify-center">
-        <div className="w-8 h-8 border-3 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[#FDE7CE] flex items-center justify-center">
+        <div className="w-8 h-8 border-[3px] border-[#151D4D]/20 border-t-[#151D4D] rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#07070f] text-gray-100 font-body flex flex-col">
+    <div className="min-h-screen bg-[#FDE7CE] text-[#000000] font-body flex flex-col">
       <Header
         onSave={saveStateToBackend}
         isSaving={isSaving}

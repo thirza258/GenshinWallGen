@@ -16,22 +16,22 @@ const TaskSection = ({ title, tasks, onToggle, onEdit, onDelete, onAdd, addInput
 
   return (
     <div>
-      <div className="font-mono text-xs tracking-wider uppercase text-indigo-400 mb-3">
+      <div className="font-mono text-xs tracking-wider uppercase text-[#151D4D] mb-3">
         {title}
       </div>
-      <div className="bg-[#14142a] border border-indigo-500/15 rounded-xl p-5">
+      <div className="bg-[#FFFCF3] border border-black/15 rounded-xl p-5">
         <div className="flex flex-col gap-1.5">
           {tasks.map((task, idx) => (
             <div
               key={task.id || idx}
-              className="flex items-center gap-2.5 px-3 py-2 bg-white/5 rounded-lg border border-transparent hover:border-indigo-500/20 hover:bg-white/5 transition-all group"
+              className="flex items-center gap-2.5 px-3 py-2 bg-[#FDE7CE]/30 rounded-lg border border-transparent hover:border-black/15 hover:bg-[#FDE7CE]/50 transition-all group"
             >
               {/* Checkbox */}
               <button
                 className={`w-4.5 h-4.5 rounded-md border flex items-center justify-center transition-all flex-shrink-0 ${
                   task.done
-                    ? 'bg-emerald-400 border-emerald-400'
-                    : 'border-indigo-300/50 bg-transparent hover:border-indigo-400'
+                    ? 'bg-[#151D4D] border-[#151D4D]'
+                    : 'border-[#151D4D]/50 bg-transparent hover:border-[#151D4D]'
                 }`}
                 onClick={() => onToggle(idx)}
               >
@@ -47,15 +47,15 @@ const TaskSection = ({ title, tasks, onToggle, onEdit, onDelete, onAdd, addInput
                 type="text"
                 value={task.text}
                 onChange={(e) => onEdit(idx, e.target.value)}
-                className={`flex-1 bg-transparent text-[0.88rem] text-gray-200 outline-none font-body ${
-                  task.done ? 'line-through text-indigo-300/50' : ''
+                className={`flex-1 bg-transparent text-[0.88rem] text-black outline-none font-body ${
+                  task.done ? 'line-through text-black/40' : ''
                 }`}
               />
 
               {/* Delete button */}
               <button
                 onClick={() => onDelete(idx)}
-                className="w-5.5 h-5.5 rounded-md text-indigo-400/50 hover:text-red-400 hover:bg-red-500/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
+                className="w-5.5 h-5.5 rounded-md text-[#151D4D]/50 hover:text-black hover:bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
               >
                 ×
               </button>
@@ -72,11 +72,11 @@ const TaskSection = ({ title, tasks, onToggle, onEdit, onDelete, onAdd, addInput
             onChange={(e) => setNewTaskText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Add task…"
-            className="flex-1 px-3 py-2 bg-white/5 border border-indigo-500/15 rounded-lg text-gray-200 text-sm outline-none focus:border-indigo-500 placeholder:text-indigo-300/40"
+            className="flex-1 px-3 py-2 bg-[#FFFCF3] border border-black/15 rounded-lg text-black text-sm outline-none focus:border-[#151D4D] placeholder:text-black/40"
           />
           <button
             onClick={handleAdd}
-            className="px-4 py-2 bg-[#14142a] border border-indigo-500/15 rounded-lg text-indigo-300 text-sm hover:bg-indigo-500/10 transition-all"
+            className="px-4 py-2 bg-[#FFFCF3] border border-black/15 rounded-lg text-[#151D4D] text-sm hover:bg-[#151D4D]/10 transition-all"
           >
             +
           </button>

@@ -32,17 +32,17 @@ const SettingsSection = ({
 
   return (
     <div>
-      <div className="font-mono text-xs tracking-wider uppercase text-indigo-400 mb-3">
+      <div className="font-mono text-xs tracking-wider uppercase text-[#151D4D] mb-3">
         Settings
       </div>
-      <div className="bg-[#14142a] border border-indigo-500/15 rounded-xl p-5 space-y-5">
+      <div className="bg-[#FFFCF3] border border-black/15 rounded-xl p-5 space-y-5">
         <div className="flex justify-between items-center">
-          <span className="text-indigo-300/70 text-sm">Background</span>
+          <span className="text-black/70 text-sm">Background</span>
           <select
             value={selectedImage}
             onChange={onImageChange}
             disabled={imagesLoading}
-            className="bg-[#0e0e1e] border border-indigo-500/20 rounded-lg px-3 py-1.5 text-gray-200 text-sm outline-none focus:border-indigo-500 max-w-[180px] truncate"
+            className="bg-[#FFFCF3] border border-black/15 rounded-lg px-3 py-1.5 text-black text-sm outline-none focus:border-[#151D4D] max-w-[180px] truncate"
           >
             <option value="random">🎲 Random</option>
             {sourceImages.map((name) => (
@@ -53,11 +53,11 @@ const SettingsSection = ({
           </select>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-indigo-300/70 text-sm">Resolution</span>
+          <span className="text-black/70 text-sm">Resolution</span>
           <select
             value={resolution}
             onChange={onResolutionChange}
-            className="bg-[#0e0e1e] border border-indigo-500/20 rounded-lg px-3 py-1.5 text-gray-200 text-sm outline-none focus:border-indigo-500"
+            className="bg-[#FFFCF3] border border-black/15 rounded-lg px-3 py-1.5 text-black text-sm outline-none focus:border-[#151D4D]"
           >
             <option value="1920x1080">1920×1080 FHD</option>
             <option value="2560x1440">2560×1440 QHD</option>

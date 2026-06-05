@@ -7,6 +7,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     fonts-dejavu-core \
     fonts-liberation \
+    fontconfig \
  && rm -rf /var/lib/apt/lists/*
 
 # Copy only backend requirements and code
@@ -14,6 +15,8 @@ COPY backend/requirements.txt /app/backend/
 RUN pip install --no-cache-dir -r /app/backend/requirements.txt
 
 COPY backend/ /app/backend/
+COPY backend/font/ /usr/local/share/fonts/custom/
+RUN fc-cache -f
 
 # Create directories that will be used as volumes
 RUN mkdir -p /app/data /app/static /app/source

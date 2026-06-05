@@ -8,3 +8,4 @@ build/
 
 # Ignore generated wallpapers
 .env
+docker-compose.prod.yml

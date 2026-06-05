@@ -4,10 +4,10 @@ const ToastItem = ({ toast }) => (
   <div
     className={`px-4 py-3 rounded-xl text-sm font-medium shadow-xl animate-slide-in ${
       toast.type === 'success'
-        ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400'
+        ? 'bg-[#151D4D]/10 border border-[#151D4D]/30 text-[#151D4D]'
         : toast.type === 'error'
-        ? 'bg-red-500/15 border border-red-500/30 text-red-400'
-        : 'bg-indigo-500/15 border border-indigo-500/30 text-indigo-400'
+        ? 'bg-[#FFFCF3] border border-black/20 text-black'
+        : 'bg-[#151D4D]/8 border border-[#151D4D]/20 text-[#151D4D]'
     }`}
   >
     {toast.message}

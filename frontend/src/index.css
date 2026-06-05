@@ -1,1 +1,39 @@
 @import "tailwindcss";
+
+@font-face {
+  font-family: "zh-cn";
+  src: url("../font/zh-cn.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --theme-bg: #fde7ce;
+  --theme-surface: #fffcf3;
+  --theme-accent: #151d4d;
+  --theme-text: #151d4d;
+  --theme-border: rgba(0, 0, 0, 0.16);
+  --theme-muted: rgba(0, 0, 0, 0.62);
+  --theme-font: "zh-cn", sans-serif;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+* {
+  font-family: var(--theme-font);
+}
+
+.font-mono,
+.font-body {
+  font-family: var(--theme-font) !important;
+}
+
+body {
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  font-family: var(--theme-font);
+}
