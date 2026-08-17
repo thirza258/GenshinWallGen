@@ -1,0 +1,21 @@
+{
+  "short_name": "GenshinWallCraft",
+  "name": "GenshinWallCraft - Daily Task Genshin Wallpaper Generator",
+  "icons": [
+    {
+      "src": "/ui_items.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/ui_items.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#FDE7CE",
+  "theme_color": "#151D4D",
+  "display": "standalone",
+  "orientation": "any"
+}

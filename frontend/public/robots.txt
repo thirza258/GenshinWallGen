@@ -1,0 +1,9 @@
+# Robots.txt for GenshinWallCraft
+User-agent: *
+Allow: /
+Allow: /#generator
+Allow: /ui_items.png
+Allow: /icons.svg
+
+# Sitemaps
+Sitemap: https://genshinwallcraft.app/sitemap.xml

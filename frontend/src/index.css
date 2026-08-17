@@ -11,10 +11,15 @@
   --theme-bg: #fde7ce;
   --theme-surface: #fffcf3;
   --theme-accent: #151d4d;
+  --theme-gold: #c58b35;
   --theme-text: #151d4d;
-  --theme-border: rgba(0, 0, 0, 0.16);
+  --theme-border: rgba(0, 0, 0, 0.14);
   --theme-muted: rgba(0, 0, 0, 0.62);
-  --theme-font: "zh-cn", sans-serif;
+  --theme-font: "zh-cn", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
@@ -36,4 +41,41 @@ body {
   background: var(--theme-bg);
   color: var(--theme-text);
   font-family: var(--theme-font);
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #fde7ce;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(21, 29, 77, 0.25);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(21, 29, 77, 0.45);
+}
+
+/* Star Sparkle Keyframe */
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.animate-twinkle {
+  animation: starTwinkle 3s ease-in-out infinite;
+}
+
+/* Subtle float animation */
+@keyframes subtleFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-float {
+  animation: subtleFloat 6s ease-in-out infinite;
 }

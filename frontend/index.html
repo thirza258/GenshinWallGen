@@ -1,12 +1,135 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/ui_items.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Daily Task Genshin Wallpaper Generator</title>
+
+    <!-- Primary Meta Tags -->
+    <title>GenshinWallCraft - Free Genshin Impact Daily Task Wallpaper Generator & Organizer</title>
+    <meta name="title" content="GenshinWallCraft - Free Genshin Impact Daily Task Wallpaper Generator & Organizer" />
+    <meta name="description" content="Generate custom Genshin Impact desktop wallpapers with your daily commissions, weekly boss tracker, resin reminders, and custom notes. Choose from 50+ official 4K artworks. Free, fast, and no login required!" />
+    <meta name="keywords" content="genshin impact wallpaper generator, genshin daily task wallpaper, genshin impact desktop organizer, genshin impact weekly boss tracker, genshin resin reminder wallpaper, genshin 4k wallpapers, genshin impact commissions checklist, anime desktop task wallpaper, hoyoverse desktop organizer, genshin wallpaper maker" />
+    <meta name="author" content="GenshinWallCraft" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#151D4D" />
+    <meta name="application-name" content="GenshinWallCraft" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://genshinwallcraft.app/" />
+
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" href="/ui_items.png" />
+    <link rel="apple-touch-icon" href="/ui_items.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Open Graph / Facebook / Discord -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://genshinwallcraft.app/" />
+    <meta property="og:site_name" content="GenshinWallCraft" />
+    <meta property="og:title" content="GenshinWallCraft - Genshin Impact Daily Task Wallpaper Generator" />
+    <meta property="og:description" content="Turn your daily commissions, weekly boss goals, and resin targets into stunning 4K Genshin Impact desktop wallpapers with official artwork." />
+    <meta property="og:image" content="https://genshinwallcraft.app/og-preview.svg" />
+    <meta property="og:image:alt" content="GenshinWallCraft Wallpaper Generator Preview with Task Overlays" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://genshinwallcraft.app/" />
+    <meta name="twitter:title" content="GenshinWallCraft - Genshin Impact Daily Task Wallpaper Generator" />
+    <meta name="twitter:description" content="Turn your daily commissions, weekly boss goals, and resin targets into stunning 4K Genshin Impact desktop wallpapers. Free, fast & 4K ready." />
+    <meta name="twitter:image" content="https://genshinwallcraft.app/og-preview.svg" />
+    <meta name="twitter:image:alt" content="GenshinWallCraft 4K Daily Task Wallpaper Generator" />
+
+    <!-- Structured Data (JSON-LD) for Search Engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://genshinwallcraft.app/#webapp",
+          "name": "GenshinWallCraft",
+          "url": "https://genshinwallcraft.app/",
+          "description": "Free web application to generate custom Genshin Impact task-overlay desktop wallpapers with daily commissions, weekly boss trackers, and custom farming notes.",
+          "applicationCategory": "ProductivityApplication",
+          "operatingSystem": "All (Windows, macOS, Linux, ChromeOS)",
+          "browserRequirements": "Requires JavaScript. Requires HTML5.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "featureList": [
+            "Daily commissions checklist overlay",
+            "Weekly trounce domain boss tracker",
+            "Custom farming notes and banner pity counter",
+            "50+ Official Genshin Impact high-resolution splashscreens & launcher art",
+            "Native 4K UHD (3840x2160), QHD (2560x1440), and FHD (1920x1080) output",
+            "Instant anonymous guest generation without registration",
+            "Optional cloud account to sync tasks across multiple PCs"
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://genshinwallcraft.app/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Is GenshinWallCraft free to use?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, GenshinWallCraft is 100% free with unlimited wallpaper generations. No subscriptions, hidden fees, or game account logins required."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Do I need to enter my Genshin Impact UID or HoYoverse password?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No! GenshinWallCraft never asks for your UID, HoYoverse login, or personal credentials. You manually write your own daily goals, weekly bosses, or notes."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What display resolutions are supported?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "We support 4K UHD (3840x2160), 2K QHD (2560x1440), Full HD (1920x1080), 1366x768 laptop standard, and 720p HD."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does Anonymous vs Account mode work?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "In Anonymous mode, you can immediately create and download wallpapers without signing up (your checklist is remembered in your browser). Logging in saves your task list and generation history to the cloud so you can access it on any device."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I set the generated wallpaper on my PC?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Once generated, click 'Download Wallpaper'. On Windows, right-click the saved PNG file and select 'Set as desktop background'. On macOS, right-click the image and choose 'Set Desktop Picture'."
+              }
+            }
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://genshinwallcraft.app/#website",
+          "url": "https://genshinwallcraft.app/",
+          "name": "GenshinWallCraft",
+          "description": "Genshin Impact Daily Task Wallpaper Generator",
+          "inLanguage": "en-US"
+        }
+      ]
+    }
+    </script>
   </head>
-  <body>
+  <body class="bg-[#FDE7CE] text-[#151D4D] min-h-screen antialiased selection:bg-[#151D4D] selection:text-[#FFFCF3]">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

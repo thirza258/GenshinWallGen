@@ -1,5 +1,3 @@
-import React from 'react';
-
 const ToastItem = ({ toast }) => (
   <div
     className={`px-4 py-3 rounded-xl text-sm font-medium shadow-xl animate-slide-in ${
