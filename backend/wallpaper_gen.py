@@ -40,18 +40,38 @@ def parse_resolution(res: str) -> tuple[int, int]:
 
 def wrap_text(text: str, font, max_width: int, draw: ImageDraw.ImageDraw) -> list[str]:
     """Wrap text to fit max_width using the given draw context (for textlength)."""
-    words = text.split()
-    lines, current = [], ""
-    for word in words:
-        test = (current + " " + word).strip()
-        if draw.textlength(test, font=font) <= max_width:
-            current = test
-        else:
-            if current:
-                lines.append(current)
-            current = word
-    if current:
-        lines.append(current)
+    if not text:
+        return []
+    lines = []
+    for paragraph in text.splitlines():
+        words = paragraph.split()
+        if not words:
+            continue
+        current = ""
+        for word in words:
+            if draw.textlength(word, font=font) > max_width:
+                if current:
+                    lines.append(current)
+                    current = ""
+                for char in word:
+                    test = current + char
+                    if draw.textlength(test, font=font) <= max_width:
+                        current = test
+                    else:
+                        if current:
+                            lines.append(current)
+                        current = char
+                continue
+
+            test = (current + " " + word).strip()
+            if draw.textlength(test, font=font) <= max_width:
+                current = test
+            else:
+                if current:
+                    lines.append(current)
+                current = word
+        if current:
+            lines.append(current)
     return lines
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -221,80 +241,89 @@ def generate_wallpaper(tasks_data: dict | None = None) -> Path:
 
     py += date_panel_h + 16
 
+    # Helper to draw task panels (Daily Tasks / Weekly Tasks) with multi-line wrapped text & bullet dots
+    def draw_tasks_panel(title: str, tasks: list, start_py: int) -> int:
+        if not tasks:
+            return start_py
+
+        header_h = 40
+        line_h = 24
+        task_gap = 8
+        text_x = px + 38
+        max_text_w = panel_w - (text_x - px) - 16
+
+        tasks_shown = tasks[:8]
+        prepared_tasks = []
+        for task in tasks_shown:
+            text = task.get("text", "")
+            lines = wrap_text(text, font, max_text_w, draw)
+            prepared_tasks.append({
+                "done": task.get("done", False),
+                "lines": lines if lines else [""]
+            })
+
+        total_tasks_h = sum(len(t["lines"]) * line_h for t in prepared_tasks) + max(0, len(prepared_tasks) - 1) * task_gap
+        panel_h = header_h + total_tasks_h + 16
+
+        draw_panel(px, start_py, panel_w, panel_h)
+        draw.rounded_rectangle([px, start_py, px + 4, start_py + panel_h], radius=2, fill=ACCENT)
+        draw.text((px + 22, start_py + 10), title, font=font, fill=ACCENT)
+
+        sep_y = start_py + header_h - 6
+        draw.line([(px + 16, sep_y), (px + panel_w - 16, sep_y)], fill=SEPARATOR, width=1)
+
+        cur_y = start_py + header_h
+        for item in prepared_tasks:
+            done = item["done"]
+            color = DONE_COLOR if done else TEXT_PRIMARY
+            bullet_color = ACCENT if not done else DONE_COLOR
+
+            first_line_y = cur_y
+            bullet_cx = px + 24
+            bullet_cy = first_line_y + 11
+
+            if done:
+                draw.line(
+                    [(bullet_cx - 4, bullet_cy), (bullet_cx - 1, bullet_cy + 3), (bullet_cx + 4, bullet_cy - 3)],
+                    fill=bullet_color,
+                    width=2,
+                )
+            else:
+                draw.ellipse(
+                    [bullet_cx - 3, bullet_cy - 3, bullet_cx + 3, bullet_cy + 3],
+                    fill=bullet_color,
+                )
+
+            for line_idx, line in enumerate(item["lines"]):
+                line_y = cur_y + line_idx * line_h
+                draw.text((text_x, line_y), line, font=font, fill=color)
+                if done and line.strip():
+                    bbox = draw.textbbox((text_x, line_y), line, font=font)
+                    mid_y = (bbox[1] + bbox[3]) // 2
+                    draw.line([(bbox[0], mid_y), (bbox[2], mid_y)], fill=color, width=1)
+
+            cur_y += len(item["lines"]) * line_h + task_gap
+
+        return start_py + panel_h + 16
+
     # ─── Daily Tasks Panel ───────────────────────────────────────────────────
     daily = data.get("daily", [])
     if daily:
-        title = "DAILY TASKS"
-        header_h = 40
-        line_h = 28
-        tasks_shown = daily[:8]
-        panel_h = header_h + len(tasks_shown) * line_h + 16
-
-        draw_panel(px, py, panel_w, panel_h)
-        draw.rounded_rectangle([px, py, px + 4, py + panel_h], radius=2, fill=ACCENT)
-        draw.text((px + 22, py + 10), title, font=font, fill=ACCENT)
-
-        sep_y = py + header_h - 6
-        draw.line([(px + 16, sep_y), (px + panel_w - 16, sep_y)], fill=SEPARATOR, width=1)
-
-        for i, task in enumerate(tasks_shown):
-            ty = py + header_h + i * line_h
-            done = task.get("done", False)
-            color = DONE_COLOR if done else TEXT_PRIMARY
-            bullet = "✓" if done else "•"
-            bullet_color = ACCENT if not done else DONE_COLOR
-
-            draw.text((px + 22, ty), bullet, font=font, fill=bullet_color)
-            label = task["text"]
-            if done:
-                bbox = draw.textbbox((px + 42, ty), label, font=font)
-                mid_y = (bbox[1] + bbox[3]) // 2
-                draw.line([(bbox[0], mid_y), (bbox[2], mid_y)], fill=color, width=1)
-            draw.text((px + 42, ty), label, font=font, fill=color)
-
-        py += panel_h + 16
+        py = draw_tasks_panel("DAILY TASKS", daily, py)
 
     # ─── Weekly Tasks Panel ──────────────────────────────────────────────────
     weekly = data.get("weekly", [])
     if weekly:
-        title = "WEEKLY TASKS"
-        header_h = 40
-        line_h = 28
-        tasks_shown = weekly[:8]
-        panel_h = header_h + len(tasks_shown) * line_h + 16
-
-        draw_panel(px, py, panel_w, panel_h)
-        draw.rounded_rectangle([px, py, px + 4, py + panel_h], radius=2, fill=ACCENT)
-        draw.text((px + 22, py + 10), title, font=font, fill=ACCENT)
-
-        sep_y = py + header_h - 6
-        draw.line([(px + 16, sep_y), (px + panel_w - 16, sep_y)], fill=SEPARATOR, width=1)
-
-        for i, task in enumerate(tasks_shown):
-            ty = py + header_h + i * line_h
-            done = task.get("done", False)
-            color = DONE_COLOR if done else TEXT_PRIMARY
-            bullet = "✓" if done else "•"
-            bullet_color = ACCENT if not done else DONE_COLOR
-
-            draw.text((px + 22, ty), bullet, font=font, fill=bullet_color)
-            label = task["text"]
-            if done:
-                bbox = draw.textbbox((px + 42, ty), label, font=font)
-                mid_y = (bbox[1] + bbox[3]) // 2
-                draw.line([(bbox[0], mid_y), (bbox[2], mid_y)], fill=color, width=1)
-            draw.text((px + 42, ty), label, font=font, fill=color)
-
-        py += panel_h + 16
+        py = draw_tasks_panel("WEEKLY TASKS", weekly, py)
 
     # ─── Notes Panel ─────────────────────────────────────────────────────────
     notes = data.get("notes", "")
-    if notes.strip():
+    if isinstance(notes, str) and notes.strip():
         title = "NOTES"
         header_h = 40
+        line_h = 24
         # Wrap notes text
         lines = wrap_text(notes, font, panel_w - 40, draw)
-        line_h = 24
         panel_h = header_h + len(lines) * line_h + 20
 
         draw_panel(px, py, panel_w, panel_h)

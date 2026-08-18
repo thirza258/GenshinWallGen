@@ -6,4 +6,4 @@ Allow: /ui_items.png
 Allow: /icons.svg
 
 # Sitemaps
-Sitemap: https://genshinwallcraft.app/sitemap.xml
+Sitemap: https://genshinwallpaper.nevatal.tech/sitemap.xml
