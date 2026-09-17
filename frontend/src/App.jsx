@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import PreviewPane from "./components/PreviewPane";
@@ -6,6 +6,10 @@ import StatusBar from "./components/StatusBar";
 import ToastContainer from "./components/ToastContainer";
 import AuthModal from "./components/AuthModal";
 import LandingPage from "./components/LandingPage";
+
+const PixelStudio = lazy(() => import("./pixel/PixelStudio"));
+const pageFromHash = () => window.location.hash.startsWith("#pixel-studio")
+  ? "pixel" : window.location.hash.startsWith("#generator") ? "generator" : "landing";
 
 const generateId = () =>
   Date.now().toString(36) + Math.random().toString(36).substring(2);
@@ -38,10 +42,8 @@ const App = () => {
   const BACKEND_URL =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:8009/api";
 
-  // Page Routing State ('landing' | 'generator')
-  const [currentPage, setCurrentPage] = useState(() =>
-    window.location.hash.startsWith("#generator") ? "generator" : "landing"
-  );
+  // Hash routing keeps both creative workspaces directly addressable.
+  const [currentPage, setCurrentPage] = useState(pageFromHash);
 
   // App State
   const [dailyTasks, setDailyTasks] = useState([]);
@@ -65,12 +67,7 @@ const App = () => {
   // Listen to hash changes for browser back/forward and deep linking
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash;
-      if (hash.startsWith("#generator")) {
-        setCurrentPage("generator");
-      } else if (hash === "" || hash === "#" || hash === "#home") {
-        setCurrentPage("landing");
-      }
+      setCurrentPage(pageFromHash());
     };
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
@@ -78,7 +75,7 @@ const App = () => {
 
   // Save guest tasks to localStorage when not authenticated
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !isLoadingInitial) {
       localStorage.setItem(
         "guestTasks",
         JSON.stringify({
@@ -90,7 +87,7 @@ const App = () => {
         }),
       );
     }
-  }, [dailyTasks, weeklyTasks, notes, resolution, selectedImage, isAuthenticated]);
+  }, [dailyTasks, weeklyTasks, notes, resolution, selectedImage, isAuthenticated, isLoadingInitial]);
 
   const addToast = useCallback((message, type = "info") => {
     const id = generateId();
@@ -136,7 +133,7 @@ const App = () => {
       });
       if (response.status === 401) {
         handleLogout();
-        setShowAuthModal(true);
+        if (pageFromHash() !== "pixel") setShowAuthModal(true);
         throw new Error("Unauthorized");
       }
       return response;
@@ -424,7 +421,13 @@ const App = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  if (isLoadingInitial) {
+  const handleOpenPixelStudio = () => {
+    setCurrentPage("pixel");
+    window.location.hash = "pixel-studio";
+    window.scrollTo({ top: 0 });
+  };
+
+  if (isLoadingInitial && currentPage !== "pixel") {
     return (
       <div className="min-h-screen bg-[#FDE7CE] flex items-center justify-center">
         <div className="w-10 h-10 border-[3px] border-[#151D4D]/20 border-t-[#151D4D] rounded-full animate-spin"></div>
@@ -442,7 +445,12 @@ const App = () => {
           isAuthenticated={isAuthenticated}
           onLoginClick={() => setShowAuthModal(true)}
           onLogout={handleLogout}
+          onOpenPixelStudio={handleOpenPixelStudio}
         />
+      ) : currentPage === "pixel" ? (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center" role="status">Opening Pixel Studio…</div>}>
+          <PixelStudio backendUrl={BACKEND_URL} onHome={handleNavigateHome} onWallpaper={() => handleGetStarted()} />
+        </Suspense>
       ) : (
         /* ─── PAGE 2: STUDIO GENERATOR ─── */
         <div className="flex flex-col flex-1 min-h-screen">
@@ -455,6 +463,7 @@ const App = () => {
             onLoginClick={() => setShowAuthModal(true)}
             onLogout={handleLogout}
             onNavigateHome={handleNavigateHome}
+            onOpenPixelStudio={handleOpenPixelStudio}
           />
 
           <div className="flex flex-col lg:grid lg:grid-cols-[400px_1fr] flex-1 min-h-0">

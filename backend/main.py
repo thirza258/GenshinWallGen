@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import AppConfig
 from app.api.routes import router
+from app.api.pixel import router as pixel_router
 from app.auth.routes import router as auth_router
 from app.bot.scheduler import start_scheduler
 from wallpaper_gen import  preload_backgrounds
@@ -35,6 +36,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.include_router(router)
+    app.include_router(pixel_router)
     app.include_router(auth_router)
     return app
 

@@ -168,6 +168,7 @@ const LandingPage = ({
   isAuthenticated,
   onLoginClick,
   onLogout,
+  onOpenPixelStudio,
 }) => {
   const [activeFaq, setActiveFaq] = useState(0);
   const [demoTheme, setDemoTheme] = useState(DEMO_THEMES[0]);
@@ -217,6 +218,7 @@ const LandingPage = ({
 
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+            <a href="#pixel-studio" onClick={onOpenPixelStudio} className="text-[#687D51] hover:text-[#151D4D] transition-colors font-semibold">Pixel Studio</a>
             <a
               href="#features"
               className="text-[#151D4D]/80 hover:text-[#151D4D] transition-colors"
@@ -353,6 +355,9 @@ const LandingPage = ({
                 <span>Explore Wallpapers</span>
                 <span className="text-sm">↓</span>
               </a>
+              <button onClick={onOpenPixelStudio} id="hero-pixel-studio-btn" className="flex items-center gap-2 px-6 py-4 rounded-xl bg-[#E3E9D7] border border-[#AFBC96] text-[#3B5037] text-base font-semibold hover:bg-[#D6E1C7] transition-all shadow-sm">
+                <span>▦</span> Create Pixel Art <span>→</span>
+              </button>
             </div>
 
             {/* Trust Points */}

@@ -6,10 +6,11 @@ const Header = ({
   isAuthenticated,
   onLoginClick,
   onLogout,
-  onNavigateHome
+  onNavigateHome,
+  onOpenPixelStudio
 }) => {
   return (
-    <header className="sticky top-0 z-20 flex justify-between items-center px-4 sm:px-9 py-4 border-b border-black/15 bg-[#FFFCF3]/95 backdrop-blur-md">
+    <header className="sticky top-0 z-20 flex flex-wrap gap-3 justify-between items-center px-4 sm:px-9 py-4 border-b border-black/15 bg-[#FFFCF3]/95 backdrop-blur-md">
       <div className="flex items-center gap-3">
         {onNavigateHome && (
           <button
@@ -34,6 +35,9 @@ const Header = ({
       </div>
 
       <div className="flex gap-2 sm:gap-3 items-center">
+        <button onClick={onOpenPixelStudio} className="px-3 py-2 rounded-lg border border-[#151D4D]/20 text-[#151D4D] text-xs font-semibold hover:bg-[#151D4D]/10 transition-all">
+          ▦ Pixel Studio
+        </button>
         {/* Auth Section */}
         {isAuthenticated ? (
           <div className="flex items-center gap-2">
