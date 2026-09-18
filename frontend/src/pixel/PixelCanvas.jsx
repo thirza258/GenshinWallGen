@@ -53,8 +53,48 @@ export default function PixelCanvas({
   onPointerUp,
   onPointerCancel,
   onDoubleClick,
+  panning = false,
+  viewportRef,
 }) {
   const ref = useRef(null);
+  const panGesture = useRef(null);
+  function startPointer(e) {
+    if (!panning) return onPointerDown(e);
+    if (panGesture.current || e.button !== 0) return;
+    e.preventDefault();
+    panGesture.current = {
+      id: e.pointerId,
+      x: e.clientX,
+      y: e.clientY,
+      left: viewportRef.current.scrollLeft,
+      top: viewportRef.current.scrollTop,
+    };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+  function movePointer(e) {
+    const gesture = panGesture.current;
+    if (!gesture) {
+      if (!panning) onPointerMove(e);
+      return;
+    }
+    if (gesture.id !== e.pointerId) return;
+    viewportRef.current.scrollLeft = gesture.left + gesture.x - e.clientX;
+    viewportRef.current.scrollTop = gesture.top + gesture.y - e.clientY;
+  }
+  function endPointer(e) {
+    if (!panGesture.current) {
+      if (!panning) onPointerUp(e);
+      return;
+    }
+    if (panGesture.current.id !== e.pointerId) return;
+    panGesture.current = null;
+    if (e.currentTarget.hasPointerCapture(e.pointerId))
+      e.currentTarget.releasePointerCapture(e.pointerId);
+  }
+  function cancelPointer() {
+    panGesture.current = null;
+    onPointerCancel();
+  }
   const width = part?.width || project.width,
     height = part?.height || project.height;
   const copies = tiled && !part ? 3 : 1;
@@ -112,10 +152,10 @@ export default function PixelCanvas({
       : null;
   const active = transforms?.[selectedPart];
   return (
-    <div className="ps-canvas-scroll">
+    <div className="ps-canvas-scroll" ref={viewportRef}>
       <div className="ps-canvas-centering">
         <div
-          className={`ps-canvas-wrap ${tool === "pose" ? "is-posing" : ""}`}
+          className={`ps-canvas-wrap ${tool === "pose" ? "is-posing" : ""} ${panning ? "is-panning" : ""}`}
           style={{
             width: width * zoom * copies,
             height: height * zoom * copies,
@@ -130,12 +170,12 @@ export default function PixelCanvas({
             aria-label={
               part ? `Edit pixels of ${part.name}` : "Pixel art drawing canvas"
             }
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            onPointerCancel={onPointerCancel}
-            onLostPointerCapture={onPointerCancel}
-            onDoubleClick={onDoubleClick}
+            onPointerDown={startPointer}
+            onPointerMove={movePointer}
+            onPointerUp={endPointer}
+            onPointerCancel={cancelPointer}
+            onLostPointerCapture={cancelPointer}
+            onDoubleClick={panning ? undefined : onDoubleClick}
             onContextMenu={(e) => e.preventDefault()}
           />
           {grid && zoom >= 4 && <div className="ps-grid-overlay" />}

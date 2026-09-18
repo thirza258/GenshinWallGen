@@ -40,7 +40,7 @@ const fetchWithTimeout = (url, options = {}) => {
 
 const App = () => {
   const BACKEND_URL =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:8009/api";
+    import.meta.env.VITE_BACKEND_URL || `${window.location.protocol}//${window.location.hostname}:8009/api`;
 
   // Hash routing keeps both creative workspaces directly addressable.
   const [currentPage, setCurrentPage] = useState(pageFromHash);
@@ -449,7 +449,7 @@ const App = () => {
         />
       ) : currentPage === "pixel" ? (
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center" role="status">Opening Pixel Studio…</div>}>
-          <PixelStudio backendUrl={BACKEND_URL} onHome={handleNavigateHome} onWallpaper={() => handleGetStarted()} />
+          <PixelStudio backendUrl={BACKEND_URL} token={token} onLogin={() => setShowAuthModal(true)} onLogout={handleLogout} onHome={handleNavigateHome} onWallpaper={() => handleGetStarted()} />
         </Suspense>
       ) : (
         /* ─── PAGE 2: STUDIO GENERATOR ─── */
@@ -501,6 +501,7 @@ const App = () => {
       {/* Global Toast Container & Auth Modal */}
       <ToastContainer toasts={toasts} />
       <AuthModal
+        backendUrl={BACKEND_URL}
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onLoginSuccess={handleLoginSuccess}

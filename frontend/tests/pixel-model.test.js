@@ -17,7 +17,35 @@ import {
   tileMask,
   tileVariants,
   validateProject,
+  uid,
 } from "../src/pixel/model.js";
+
+test("project IDs remain valid on phones accessing a local HTTP server", () => {
+  const original = globalThis.crypto.randomUUID;
+  try {
+    globalThis.crypto.randomUUID = undefined;
+    const ids = Array.from({ length: 20 }, uid);
+    assert.equal(new Set(ids).size, ids.length);
+    for (const id of ids)
+      assert.match(
+        id,
+        /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/,
+      );
+    assert.equal(validateProject(createProject()).version, 1);
+  } finally {
+    globalThis.crypto.randomUUID = original;
+  }
+});
+
+test("older imports gain project IDs and UUID spelling is normalized for account storage", () => {
+  const project = createProject();
+  const id = project.id;
+  project.id = id.toUpperCase();
+  assert.equal(validateProject(project).id, id);
+  delete project.id;
+  assert.match(validateProject(project).id, /^[0-9a-f-]{36}$/);
+  assert.equal(project.id, undefined);
+});
 
 test("each creation pipeline produces a valid, independently editable project", () => {
   for (const mode of ["sprite", "puppet", "background"]) {

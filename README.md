@@ -27,6 +27,7 @@ Generated wallpapers and app data are stored in Docker volumes, so they survive 
 ### Start the stack
 
 ```bash
+cp -n .env.example .env
 docker compose up -d --build
 ```
 
@@ -65,7 +66,11 @@ Anonymous users can generate and download without registering. Authenticated use
 3. Add or duplicate frames, set durations and tags, and preview the animation. For characters, select a bone to rotate it or double-click a part to edit its shared pixels. For backgrounds, paint connected terrain and preview each layer's parallax ratio.
 4. Choose **Export** for PNG, a sprite sheet, GIF/APNG/WebP, an extruded autotile atlas, or a parallax layer stack. Multi-file exports include JSON metadata in one ZIP.
 
-Your current pixel project is autosaved in this browser's IndexedDB. **Save project** downloads an editable `.pixel.json` backup; **Open project** restores it on any device. Starting a new project replaces the browser's current autosave, so download a copy first. Pixel projects are stored on your device and are independent of wallpaper account storage.
+**Library → Browse library** includes 24 human characters, 16 layered scenes, 15 props and sprites, and five original character bases. Search or filter by Fantasy, Cozy, School life, and Romcom to find a cast and setting. Open a starter project, use a character, add scene layers, or stamp a prop; every action supports undo.
+
+Your current pixel project is autosaved in this browser's IndexedDB. Sign in to also autosave the editable project and current PNG result to your account after a short pause. **Saved projects** lets you reopen your work on another device, download its PNG, or remove older copies. Save failures are shown in the editor; temporary connection failures retry automatically, and revision conflicts offer recovery or **Save as new copy**.
+
+**Save project** downloads an editable `.pixel.json` backup; **Open project** restores it on any device. Guests should download a backup before replacing their current browser project. On phones, the bottom bar opens Tools, Colors, Layers, Frames, Rig, and Library. Use **Fit** to size the canvas and **Move** to pan without drawing; choose Secondary in Colors or Erase terrain in Tools for actions otherwise available by right-click.
 
 Drawing, project files, PNGs, sprite sheets, palettes, and tileset exports run in the browser. Animated GIF, APNG, and lossless WebP exports use the backend's anonymous `/api/pixel/export` endpoint. See [Pixel Studio's feature and export guide](docs/pixel-studio.md) for details and limits.
 
@@ -79,13 +84,13 @@ npm run lint
 npm run build
 ```
 
-The pixel engine tests use Node's built-in test runner. To test animated exports, install `backend/requirements-dev.txt` in your Python environment, then run from the repository root:
+The pixel engine tests use Node's built-in test runner. To test animated exports and account autosave, install `backend/requirements-dev.txt` in your Python environment, then run from the repository root:
 
 ```bash
 python -m unittest discover -s backend/tests -v
 ```
 
-These backend tests exercise the actual pixel export router without starting the wallpaper scheduler, database, or MinIO.
+These backend tests exercise real codecs, authenticated project storage, ownership, revisions, limits, migrations, and database bootstrap using isolated test databases. They do not start the wallpaper scheduler or MinIO.
 
 ## Environment Notes
 
@@ -93,11 +98,23 @@ The compose file already wires the local services together. You normally do not 
 
 Useful values to know:
 
-- Backend uses SQLite at `backend/wallcraft.db` inside the container
+- Docker stores SQLite at `/app/data/wallcraft.db` in the persistent `backend-data` volume, including accounts, editable pixel projects, and their PNG results. Container rebuilds retain this volume; `docker compose down -v` deletes it.
+- `DATABASE_URL` configures both the app and Alembic. Direct Python development defaults to `backend/wallcraft.db`; Docker runs migrations automatically at startup.
 - MinIO stores wallpapers in the `wallpapers` bucket
 - Backend can still read optional WhatsApp settings from `backend/.env`
 
 If you want to customize storage, credentials, or the WhatsApp scheduler later, edit `docker-compose.yml` and the backend environment values there.
+
+### Upgrading an existing container
+
+Older versions kept SQLite in the container's `/app/backend/wallcraft.db`, outside the data volume. Before rebuilding an existing installation, pause editing and copy that live database into the volume. This command uses SQLite's backup API and refuses to replace an existing destination:
+
+```bash
+docker compose exec backend python -c 'from pathlib import Path; import sqlite3; target = Path("/app/data/wallcraft.db"); target.parent.mkdir(parents=True, exist_ok=True); assert not target.exists(), "Persistent database already exists; no copy made"; source = sqlite3.connect("file:/app/backend/wallcraft.db?mode=ro", uri=True); destination = sqlite3.connect(target); source.backup(destination); destination.close(); source.close()'
+docker compose up -d --build
+```
+
+Fresh volumes are initialized once from the bundled database. Existing persistent databases are never replaced during startup. Back up the data volume along with MinIO when moving installations.
 
 ## Project Layout
 

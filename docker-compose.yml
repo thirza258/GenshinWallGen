@@ -27,6 +27,7 @@ services:
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
 
       # Database
+      DATABASE_URL: sqlite:////app/data/wallcraft.db
       DB_HOST: ${DB_HOST:-postgres}
       DB_PORT: ${DB_PORT:-5432}
       DB_NAME: ${DB_NAME:-wallcraft}

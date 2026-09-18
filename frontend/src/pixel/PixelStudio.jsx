@@ -20,6 +20,11 @@ import {
 import { readProject, saveProject } from "./storage";
 import { download, exportProject } from "./export";
 import { renderFrame } from "./render";
+import { applyLibraryAsset, createLibraryProject } from "./library";
+import AssetLibrary from "./AssetLibrary";
+import { fitCanvasZoom, MIN_ZOOM } from "./viewport";
+import useCloudAutosave from "./useCloudAutosave";
+import SavedProjects from "./SavedProjects";
 import PixelCanvas, { Thumbnail } from "./PixelCanvas";
 import { ExportDialog, Modal, NewProjectDialog } from "./Dialogs";
 import NumberField from "./NumberField";
@@ -38,18 +43,22 @@ const initial = () => ({
   future: [],
 });
 const chooseZoom = (width, height) =>
-  Math.max(
-    1,
-    Math.min(
-      12,
-      Math.floor(
-        Math.min(440 / width, 400 / height, (window.innerWidth - 56) / width),
-      ),
-    ),
+  fitCanvasZoom(
+    width,
+    height,
+    Math.min(440, window.innerWidth - 56),
+    Math.min(400, window.innerHeight * 0.45),
   );
 const totalDuration = (p) => p.frames.reduce((sum, f) => sum + f.duration, 0);
 
-export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
+export default function PixelStudio({
+  backendUrl,
+  token,
+  onLogin,
+  onLogout,
+  onHome,
+  onWallpaper,
+}) {
   const [history, setHistory] = useState(initial),
     [draft, setDraft] = useState(null);
   const project = history.present,
@@ -69,6 +78,7 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
     mirrorX: false,
     mirrorY: false,
     pattern: "Brick",
+    eraseTerrain: false,
   });
   const options = {
     ...brushOptions,
@@ -87,6 +97,9 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
     [dialog, setDialog] = useState(null),
     [exportBusy, setExportBusy] = useState(false),
     [exportError, setExportError] = useState("");
+  const [mobilePanel, setMobilePanel] = useState("canvas"),
+    [panning, setPanning] = useState(false);
+  const canvasViewport = useRef(null);
   const [notice, setNotice] = useState(null),
     [cursor, setCursor] = useState(null);
   const gesture = useRef(null),
@@ -104,6 +117,11 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
       ? "pencil"
       : chosenTool;
   const activeTab = tab === "rig" && project.mode !== "puppet" ? "layers" : tab;
+  const activeMobilePanel =
+    mobilePanel === "rig" && project.mode !== "puppet" ? "layers" : mobilePanel;
+  const canvasWidth = part?.width || project.width,
+    canvasHeight = part?.height || project.height;
+  const canvasCopies = tiled && !part ? 3 : 1;
   const primaryColor = Math.min(color, project.palette.length - 1),
     secondaryColor = Math.min(secondary, project.palette.length - 1);
   const animation = playing
@@ -112,6 +130,70 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
   const notify = useCallback(
     (text, error = false) => setNotice({ text, error }),
     [],
+  );
+  const cloud = useCloudAutosave({
+    project,
+    frame,
+    token,
+    backendUrl,
+    enabled: loaded,
+  });
+  const cloudLabel =
+    cloud.state === "saved"
+      ? "Saved to your account"
+      : cloud.state === "saving"
+        ? "Saving to your account…"
+        : cloud.state === "error"
+          ? cloud.message
+          : "Account autosave pending…";
+  function signIn() {
+    setDialog(null);
+    onLogin();
+  }
+
+  useEffect(() => {
+    const viewport = canvasViewport.current;
+    if (!loaded || !viewport) return;
+    const observer = new ResizeObserver(() => {
+      setZoom(
+        fitCanvasZoom(
+          canvasWidth * canvasCopies,
+          canvasHeight * canvasCopies,
+          viewport.clientWidth - 48,
+          viewport.clientHeight - 24,
+        ),
+      );
+    });
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [loaded, canvasWidth, canvasHeight, canvasCopies]);
+
+  function fitCanvas() {
+    const viewport = canvasViewport.current;
+    setZoom(
+      fitCanvasZoom(
+        canvasWidth * canvasCopies,
+        canvasHeight * canvasCopies,
+        viewport.clientWidth - 48,
+        viewport.clientHeight - 24,
+      ),
+    );
+  }
+  function showMobilePanel(panel) {
+    setMobilePanel(panel);
+    if (["layers", "rig", "library"].includes(panel)) setTab(panel);
+    if (panel === "canvas" && window.matchMedia("(max-width: 850px)").matches)
+      requestAnimationFrame(() =>
+        canvasViewport.current
+          ?.closest(".ps-main-panel")
+          .scrollIntoView({ block: "start" }),
+      );
+  }
+  const mobileHeading = (title) => (
+    <div className="ps-mobile-panel-heading">
+      <strong>{title}</strong>
+      <button onClick={() => showMobilePanel("canvas")}>Done</button>
+    </div>
   );
 
   useEffect(() => {
@@ -304,6 +386,7 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
     const keydown = (e) => {
       if (
         dialog ||
+        e.target.closest("dialog[open], [role='dialog']") ||
         /input|select|textarea/i.test(e.target.tagName) ||
         e.target.isContentEditable ||
         gesture.current
@@ -342,13 +425,18 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
     return () => window.removeEventListener("keydown", keydown);
   }, [dialog, undo, redo, saveFile, project.mode, part]);
 
-  function reset(next) {
+  function reset(next, flushPrevious = true) {
+    if (flushPrevious) void cloud.flush();
     setHistory({ past: [], present: next, future: [] });
     setDraft(null);
     setFrameIndex(0);
+    setMobilePanel("canvas");
+    setPanning(false);
     setLayerId(next.layers.at(-1).id);
     setEditingPart(null);
-    setPartId(next.rig[0]?.id || "torso");
+    setPartId(
+      next.rig.find((p) => p.id === "torso")?.id || next.rig[0]?.id || "torso",
+    );
     setPlaying(false);
     setParallax(false);
     setElapsed(0);
@@ -367,6 +455,40 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
     setDialog(null);
     setBrushOptions((o) => ({ ...o, mirrorX: false, mirrorY: false }));
     setSaveStatus("Unsaved changes");
+  }
+  function useLibraryAsset(asset, openNew) {
+    try {
+      if (openNew) {
+        const next = createLibraryProject(asset);
+        reset(next);
+        setHistory({ past: [project], present: next, future: [] });
+      } else {
+        const next = clone(project);
+        const selectedLayer = applyLibraryAsset(next, asset, {
+          frame,
+          layer: layer.id,
+        });
+        commit(next);
+        setDraft(null);
+        setEditingPart(null);
+        setLayerId(selectedLayer);
+        setParallax(false);
+        setPartId(
+          next.rig.find((p) => p.id === "torso")?.id ||
+            next.rig[0]?.id ||
+            "torso",
+        );
+        setTool(asset.kind === "character" ? "pose" : "pencil");
+      }
+      notify(
+        `${asset.name} ${openNew ? "opened" : "added"}. Undo is available.`,
+      );
+      setMobilePanel("canvas");
+      setPanning(false);
+      return true;
+    } catch (error) {
+      return error.message;
+    }
   }
   async function importFile(e) {
     const file = e.target.files[0];
@@ -562,7 +684,7 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
         working,
         start: position,
         last: position,
-        erase: e.button === 2,
+        erase: e.button === 2 || (tool === "terrain" && options.eraseTerrain),
         changed: false,
         pointerId: e.pointerId,
       };
@@ -623,6 +745,8 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
     }
   }
   function editPart(id) {
+    setMobilePanel("canvas");
+    setPanning(false);
     setEditingPart(id);
     setPartId(id);
     setTool("pencil");
@@ -634,6 +758,7 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
     setPlaying(false);
     setParallax(false);
     setTool(next);
+    setPanning(false);
   }
   function addFrame(duplicate = false) {
     if (
@@ -678,6 +803,7 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
     setFrameIndex(destination);
   }
   async function navigate(callback) {
+    void cloud.flush();
     if (storageEnabled) {
       try {
         await saveProject(project);
@@ -697,7 +823,7 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
       </div>
     );
   return (
-    <main className="pixel-studio">
+    <main className="pixel-studio" data-mobile-panel={activeMobilePanel}>
       <h1 className="ps-sr-only">Pixel Studio</h1>
       <header className="ps-header">
         <div className="ps-brand">
@@ -798,8 +924,57 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
           </button>
         </div>
       </div>
+      <section className="ps-account-bar" aria-label="Project autosave">
+        <div>
+          <strong>{token ? "Account autosave" : "Browser autosave"}</strong>
+          <span role="status">
+            {token ? cloudLabel : "Sign in to sync projects and PNG results."}
+          </span>
+        </div>
+        <div className="ps-account-actions">
+          {token ? (
+            <>
+              <button onClick={() => setDialog("saved")}>Saved projects</button>
+              {cloud.state === "error" && cloud.code === 401 ? (
+                <button onClick={signIn}>Sign in again</button>
+              ) : cloud.state === "error" && cloud.code === 409 ? (
+                <button
+                  onClick={() => {
+                    const next = clone(project);
+                    next.id = uid();
+                    next.name = `${next.name.slice(0, 90)} copy`;
+                    reset(next, false);
+                    setHistory({ past: [project], present: next, future: [] });
+                  }}
+                >
+                  Save as a new copy
+                </button>
+              ) : cloud.state === "error" ? (
+                <button onClick={cloud.retry}>Retry autosave</button>
+              ) : null}
+              <button
+                onClick={() => {
+                  void cloud.flush();
+                  onLogout();
+                }}
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <button onClick={signIn}>Sign in to sync</button>
+          )}
+        </div>
+      </section>
       <div className="ps-workspace">
-        <aside className="ps-left-panel" aria-label="Drawing tools and palette">
+        <aside
+          className="ps-left-panel"
+          id="ps-tools-drawer"
+          aria-label="Drawing tools and palette"
+        >
+          {mobileHeading(
+            activeMobilePanel === "palette" ? "Colors" : "Drawing tools",
+          )}
           <ToolPanel
             project={project}
             tool={tool}
@@ -808,6 +983,13 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
             setOptions={setOptions}
             part={part}
           />
+          {project.mode !== "sprite" && (
+            <div className="ps-mobile-tool-settings">
+              <button onClick={() => showMobilePanel("library")}>
+                Terrain themes & part styles →
+              </button>
+            </div>
+          )}
           <PalettePanel
             project={project}
             update={update}
@@ -830,7 +1012,7 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
             </div>
             <div className="ps-canvas-controls">
               <button
-                onClick={() => setZoom((z) => Math.max(0.5, z / 2))}
+                onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z / 2))}
                 aria-label="Zoom out"
               >
                 −
@@ -842,20 +1024,9 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
               >
                 ＋
               </button>
+              <button onClick={fitCanvas}>Fit</button>
               <button
-                onClick={() =>
-                  setZoom(
-                    chooseZoom(
-                      part?.width || project.width,
-                      part?.height || project.height,
-                    ),
-                  )
-                }
-              >
-                Fit
-              </button>
-              <button
-                className={grid ? "active" : ""}
+                className={`ps-grid-toggle ${grid ? "active" : ""}`}
                 aria-pressed={grid}
                 title="Toggle pixel grid (G)"
                 onClick={() => setGrid(!grid)}
@@ -863,6 +1034,30 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
                 ▦
               </button>
             </div>
+          </div>
+          <div className="ps-mobile-quick-tools">
+            <button
+              onClick={() => showMobilePanel("tools")}
+              aria-label="Choose drawing tool"
+            >
+              {TOOLS.find((t) => t[0] === tool)?.[2] ||
+                (tool === "pose" ? "Pose" : "Autotile")}{" "}
+              ▾
+            </button>
+            <button
+              onClick={() => showMobilePanel("palette")}
+              aria-label="Choose paint color"
+            >
+              <i style={{ background: project.palette[primaryColor] }} /> Color
+            </button>
+            <button
+              className={panning ? "active" : ""}
+              aria-pressed={panning}
+              aria-label="Move canvas"
+              onClick={() => setPanning(!panning)}
+            >
+              ✥ Move
+            </button>
           </div>
           {part && (
             <div className="ps-edit-banner">
@@ -905,6 +1100,8 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
               part={part}
               selectedPart={selectedPart?.id}
               tool={tool}
+              panning={panning}
+              viewportRef={canvasViewport}
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
@@ -918,16 +1115,25 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
             />
             <div className="ps-stage-footnote">
               <span>
-                {playing || parallax
-                  ? "Preview playing · pause to edit"
-                  : tool === "pose"
-                    ? "Drag a limb to rotate · double-click to edit pixels"
-                    : "One pixel at a time."}
+                {panning
+                  ? "Drag to move the canvas. Turn Move off to draw."
+                  : playing || parallax
+                    ? "Preview playing · pause to edit"
+                    : tool === "pose"
+                      ? "Drag a limb to rotate · edit its pixels in Rig"
+                      : "One pixel at a time."}
               </span>
               <span>{cursor ? `${cursor[0]}, ${cursor[1]}` : "x, y"} px</span>
             </div>
           </div>
           <div className="ps-canvas-options">
+            <button
+              className={`ps-mobile-grid ${grid ? "active" : ""}`}
+              aria-pressed={grid}
+              onClick={() => setGrid(!grid)}
+            >
+              ▦ Grid
+            </button>
             <button
               aria-pressed={onion}
               className={onion ? "active" : ""}
@@ -972,7 +1178,12 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
               Clear {part ? "part" : "cel"}
             </button>
           </div>
-          <section className="ps-timeline" aria-label="Animation timeline">
+          <section
+            className="ps-timeline"
+            id="ps-timeline-drawer"
+            aria-label="Animation timeline"
+          >
+            {mobileHeading("Animation timeline")}
             <div className="ps-timeline-heading">
               <div>
                 <span className="ps-section-label">03 / TIMELINE</span>
@@ -1139,7 +1350,18 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
             )}
           </section>
         </section>
-        <aside className="ps-right-panel" aria-label="Project inspector">
+        <aside
+          className="ps-right-panel"
+          id="ps-inspector-drawer"
+          aria-label="Project inspector"
+        >
+          {mobileHeading(
+            activeMobilePanel === "rig"
+              ? "Character rig"
+              : activeMobilePanel === "library"
+                ? "Terrain & parts"
+                : "Layers",
+          )}
           <div
             className="ps-inspector-tabs"
             role="tablist"
@@ -1180,13 +1402,10 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
             {activeTab === "library" && (
               <LibraryPanel
                 project={project}
-                frame={frame}
-                layer={layer.id}
                 update={update}
                 selectedPart={selectedPart?.id}
-                setSelectedPart={setPartId}
                 setTool={selectTool}
-                notify={notify}
+                onBrowse={() => setDialog("library")}
               />
             )}
             {activeTab === "rig" && project.mode === "puppet" && (
@@ -1244,6 +1463,33 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
           </div>
         </aside>
       </div>
+      <nav className="ps-mobile-nav" aria-label="Studio panels">
+        {[
+          ["canvas", "✎", "Draw"],
+          ["tools", "▦", "Tools"],
+          ["palette", "◉", "Colors"],
+          ["layers", "▱", "Layers"],
+          ["timeline", "▶", "Frames"],
+          ...(project.mode === "puppet" ? [["rig", "♧", "Rig"]] : []),
+        ].map(([id, icon, label]) => (
+          <button
+            key={id}
+            aria-label={`Show ${label.toLowerCase()}`}
+            aria-pressed={activeMobilePanel === id}
+            className={activeMobilePanel === id ? "active" : ""}
+            onClick={() => showMobilePanel(id)}
+          >
+            <span aria-hidden="true">{icon}</span>
+            {label}
+          </button>
+        ))}
+        <button
+          aria-label="Open asset library"
+          onClick={() => setDialog("library")}
+        >
+          <span aria-hidden="true">▧</span>Library
+        </button>
+      </nav>
       <footer className="ps-footer">
         <span>
           <i /> Pixel Studio{" "}
@@ -1270,6 +1516,31 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
           onCreate={reset}
           onClose={() => setDialog(null)}
           onDownload={saveFile}
+        />
+      )}
+      {dialog === "library" && (
+        <AssetLibrary
+          project={project}
+          onUse={useLibraryAsset}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog === "saved" && token && (
+        <SavedProjects
+          backendUrl={backendUrl}
+          token={token}
+          currentId={project.id}
+          onBeforeOpen={cloud.flush}
+          onOpen={(next, previewFrame) => {
+            reset(next, false);
+            setFrameIndex(previewFrame);
+            setHistory({ past: [project], present: next, future: [] });
+            notify(
+              "Account project opened. Undo returns to your previous project.",
+            );
+          }}
+          onClose={() => setDialog(null)}
+          onLogin={signIn}
         />
       )}
       {dialog === "export" && (
@@ -1334,10 +1605,10 @@ export default function PixelStudio({ backendUrl, onHome, onWallpaper }) {
             ))}
           </div>
           <p className="ps-dialog-note">
-            Work is autosaved on this browser and device. Download a project
-            file to back it up or continue on another device. PNGs, sprite
-            sheets, tilesets, and project files export without a server
-            connection.
+            Work is autosaved on this device. Sign in to sync editable projects
+            and PNG results across devices, or download a project file for a
+            backup. PNGs, sprite sheets, tilesets, and project files export
+            without a server connection.
           </p>
         </Modal>
       )}

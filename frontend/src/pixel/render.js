@@ -36,7 +36,7 @@ export function drawTile(ctx, x, y, size, mask, theme, palette, rule) {
   ctx.fillStyle = theme === "Grassland" ? colors[2] : colors[0];
   ctx.fillRect(x, y, size, size);
   ctx.fillStyle = colors[3];
-  if (theme === "Dungeon / Cave") {
+  if (["Dungeon / Cave", "Castle stone", "Festival paving"].includes(theme)) {
     for (let iy = 0; iy < size; iy += 4) {
       ctx.fillRect(x, y + iy, size, 1);
       for (let ix = iy % 8 ? 4 : 0; ix < size; ix += 8)
@@ -54,6 +54,20 @@ export function drawTile(ctx, x, y, size, mask, theme, palette, rule) {
     ctx.fillStyle = colors[3];
     ctx.fillRect(x + 3, y + 3, size - 6, 1);
     ctx.fillRect(x + size - 3, y + size - 3, 1, 1);
+  } else if (
+    ["Cozy village", "Café interior", "Coastal path"].includes(theme)
+  ) {
+    ctx.fillStyle = colors[2];
+    for (let iy = 3; iy < size; iy += 4) {
+      ctx.fillRect(x, y + iy, size, 1);
+      ctx.fillRect(x + (iy % 8 ? 2 : Math.floor(size / 2)), y + iy - 3, 1, 3);
+    }
+  } else if (theme === "School floor") {
+    ctx.fillStyle = colors[2];
+    ctx.fillRect(x, y + size - 1, size, 1);
+    ctx.fillRect(x + size - 1, y, 1, size);
+    ctx.fillStyle = colors[3];
+    ctx.fillRect(x + 1, y + 1, size - 2, 1);
   } else {
     for (let iy = 2; iy < size; iy += 3)
       for (let ix = 1; ix < size; ix += 4) ctx.fillRect(x + ix, y + iy, 1, 1);

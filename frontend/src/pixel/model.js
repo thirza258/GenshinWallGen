@@ -1,3 +1,10 @@
+import { nearestColor, STORY_COLORS } from "./art.js";
+import { BACKGROUNDS, HUMAN_CHARACTERS, PROPS } from "./catalog.js";
+import { createHumanRig } from "./characters.js";
+import { backgroundLayers } from "./backgrounds.js";
+import { propPixels } from "./props.js";
+export { nearestColor } from "./art.js";
+
 export const VERSION = 1;
 export const MAX_PIXELS = 8_388_608;
 export const TOOLS = [
@@ -11,6 +18,7 @@ export const TOOLS = [
   ["pattern", "▦", "Pattern", "T"],
 ];
 export const PALETTES = {
+  Storybook: Object.values(STORY_COLORS),
   "PICO-8": [
     "#000000",
     "#1d2b53",
@@ -92,8 +100,26 @@ export const THEMES = {
   "Dungeon / Cave": ["#1d2b53", "#83769c", "#5f574f", "#c2c3c7"],
   Cyberpunk: ["#1d2b53", "#ff77a8", "#7e2553", "#29adff"],
   "Sci-Fi": ["#5f574f", "#29adff", "#1d2b53", "#c2c3c7"],
+  "Castle stone": ["#38445f", "#d6dae0", "#aebccc", "#816594"],
+  "Enchanted forest": ["#354f45", "#89aa75", "#53785b", "#e1b568"],
+  "Cozy village": ["#78503e", "#efd3a3", "#a57c5b", "#fff0d7"],
+  "Café interior": ["#a57c5b", "#fff0d7", "#78503e", "#df8da3"],
+  "School floor": ["#aebccc", "#fff0d7", "#638fba", "#d6dae0"],
+  "Sakura garden": ["#53785b", "#f5c4cf", "#89aa75", "#df8da3"],
+  "Festival paving": ["#644565", "#e1b568", "#b17b93", "#df8da3"],
+  "Coastal path": ["#a57c5b", "#efd3a3", "#78503e", "#6aa9b0"],
 };
-export const uid = () => globalThis.crypto.randomUUID();
+export const uid = () => {
+  if (globalThis.crypto.randomUUID) return globalThis.crypto.randomUUID();
+  // Local-network HTTP on phones lacks randomUUID, but supports getRandomValues.
+  const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 15) | 64;
+  bytes[8] = (bytes[8] & 63) | 128;
+  const hex = Array.from(bytes, (byte) =>
+    byte.toString(16).padStart(2, "0"),
+  ).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+};
 export const blankPixels = (w, h) => Array(w * h).fill(-1);
 export const clone = (value) => structuredClone(value);
 export const makeCel = (w, h) => ({ pixels: blankPixels(w, h), tiles: {} });
@@ -110,21 +136,6 @@ export const makeLayer = (name, ratio = 1) => ({
 export const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 export const mod = (n, size) => ((n % size) + size) % size;
 
-export function nearestColor(hex, palette) {
-  const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-  const target = rgb(hex);
-  let distance = Infinity,
-    result = 0;
-  palette.forEach((color, index) => {
-    const d = rgb(color).reduce((sum, c, i) => sum + (c - target[i]) ** 2, 0);
-    if (d < distance) {
-      distance = d;
-      result = index;
-    }
-  });
-  return result;
-}
-
 export function createProject({
   name = "Untitled sprite",
   mode = "sprite",
@@ -133,6 +144,7 @@ export function createProject({
   palette = "PICO-8",
   archetype = "Knight",
   sample = false,
+  scene = "",
 } = {}) {
   const colors = [...PALETTES[palette]];
   const layers =
@@ -144,6 +156,7 @@ export function createProject({
         ]
       : [makeLayer("Artwork")];
   const project = {
+    id: uid(),
     version: VERSION,
     name,
     mode,
@@ -176,7 +189,18 @@ export function createProject({
   };
   if (mode === "puppet")
     project.rig = createRig(archetype, width, height, colors);
-  if (mode === "background" && sample) seedBackground(project);
+  if (mode === "background" && sample) {
+    const background = BACKGROUNDS.find((entry) => entry.id === scene);
+    if (background) {
+      const artwork = backgroundLayers(background, width, height, colors);
+      artwork.forEach((plane, i) => {
+        layers[i].name = plane.name;
+        layers[i].ratio = plane.ratio;
+        project.frames[0].cels[layers[i].id].pixels = plane.pixels;
+      });
+      project.theme = background.theme;
+    } else seedBackground(project);
+  }
   if (mode === "sprite" && sample) {
     project.frames[0].cels[layers[0].id].pixels = spritePixels(
       width,
@@ -207,6 +231,10 @@ export function spritePixels(
   type = "Sprout",
   phase = 0,
 ) {
+  const prop = PROPS.find((entry) => entry.name === type || entry.id === type);
+  if (prop && !["sprout", "crystal", "heart"].includes(prop.id))
+    return propPixels(prop.id, width, height, palette, phase);
+  if (prop) type = prop.name;
   const pixels = blankPixels(width, height);
   const patterns = {
     Sprout: [
@@ -282,6 +310,10 @@ export function spritePixels(
 }
 
 export function createRig(archetype, width, height, palette) {
+  const human = HUMAN_CHARACTERS.find(
+    (entry) => entry.name === archetype || entry.id === archetype,
+  );
+  if (human) return createHumanRig(human, width, height, palette);
   const s = Math.max(1, Math.floor(Math.min(width, height) / 36));
   const skin = archetype === "Goblin" ? "#00e436" : "#ffccaa";
   const outfit =
@@ -719,6 +751,13 @@ export function validateProject(p) {
       "This is not a valid Pixel Studio project, or it exceeds the project limits.",
     );
   };
+  if (
+    p &&
+    p.id !== undefined &&
+    (typeof p.id !== "string" ||
+      !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(p.id))
+  )
+    fail();
   const integer = (n, a, b) => Number.isInteger(n) && n >= a && n <= b;
   const finite = (n, a, b) => Number.isFinite(n) && n >= a && n <= b;
   const string = (s, limit = 100) =>
@@ -854,5 +893,7 @@ export function validateProject(p) {
       }
     }
   }
-  return clone(p);
+  const result = clone(p);
+  result.id = result.id ? result.id.toLowerCase() : uid();
+  return result;
 }

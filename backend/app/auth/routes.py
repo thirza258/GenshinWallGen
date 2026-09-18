@@ -8,9 +8,6 @@ router = APIRouter(prefix="/api", tags=["auth"])
 @router.post("/register", response_model=schemas.Token)
 def register(user: schemas.UserCreate, db: Session = Depends(dependencies.get_db)):
     existing_user = db.query(User).filter(User.username == user.username).first()
-    print(user.password)
-    print(type(user.password))
-    print(len(user.password))
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     hashed_password = utils.get_password_hash(user.password)

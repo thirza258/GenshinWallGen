@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { PALETTES, createProject } from "./model";
+import { BACKGROUNDS, CHARACTER_GROUPS, GENRES } from "./catalog";
 
 export function Modal({ title, children, onClose, className = "" }) {
   const ref = useRef(null);
@@ -11,6 +12,7 @@ export function Modal({ title, children, onClose, className = "" }) {
   return (
     <dialog
       ref={ref}
+      aria-label={title}
       className={`ps-dialog ${className}`}
       onCancel={(e) => {
         e.preventDefault();
@@ -42,7 +44,8 @@ export function NewProjectDialog({ onCreate, onClose, onDownload }) {
   const [customSize, setCustomSize] = useState(false);
   const [name, setName] = useState("Untitled sprite"),
     [palette, setPalette] = useState("PICO-8"),
-    [archetype, setArchetype] = useState("Knight"),
+    [archetype, setArchetype] = useState("Village adventurer"),
+    [scene, setScene] = useState(""),
     [sample, setSample] = useState(false);
   function chooseMode(next) {
     setMode(next);
@@ -56,6 +59,7 @@ export function NewProjectDialog({ onCreate, onClose, onDownload }) {
     setWidth(next === "background" ? 64 : 32);
     setHeight(next === "background" ? 64 : 32);
     setCustomSize(false);
+    if (next !== "sprite") setPalette("Storybook");
   }
   return (
     <Modal title="A little canvas. Endless possibilities." onClose={onClose}>
@@ -74,6 +78,7 @@ export function NewProjectDialog({ onCreate, onClose, onDownload }) {
               palette,
               archetype,
               sample,
+              scene,
             }),
           );
         }}
@@ -137,6 +142,7 @@ export function NewProjectDialog({ onCreate, onClose, onDownload }) {
                 </option>
               ))}
               <option value="320x180">320 × 180 · Parallax</option>
+              <option value="128x72">128 × 72 · Scene</option>
               <option value="custom">Custom size</option>
             </select>
           </label>
@@ -189,14 +195,12 @@ export function NewProjectDialog({ onCreate, onClose, onDownload }) {
               value={archetype}
               onChange={(e) => setArchetype(e.target.value)}
             >
-              {[
-                "Humanoid male",
-                "Humanoid female",
-                "Knight",
-                "Goblin",
-                "Quadruped",
-              ].map((a) => (
-                <option key={a}>{a}</option>
+              {CHARACTER_GROUPS.map((group) => (
+                <optgroup key={group.name} label={group.name}>
+                  {group.characters.map((character) => (
+                    <option key={character.id}>{character.name}</option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </label>
@@ -209,6 +213,25 @@ export function NewProjectDialog({ onCreate, onClose, onDownload }) {
               onChange={(e) => setSample(e.target.checked)}
             />{" "}
             Start with sample artwork
+          </label>
+        )}
+        {mode === "background" && sample && (
+          <label>
+            Scene artwork
+            <select value={scene} onChange={(e) => setScene(e.target.value)}>
+              <option value="">Original parallax hills</option>
+              {GENRES.map((genre) => (
+                <optgroup key={genre} label={genre}>
+                  {BACKGROUNDS.filter((entry) => entry.genre === genre).map(
+                    (entry) => (
+                      <option key={entry.id} value={entry.id}>
+                        {entry.name}
+                      </option>
+                    ),
+                  )}
+                </optgroup>
+              ))}
+            </select>
           </label>
         )}
         <div className="ps-dialog-note">

@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import {
   blankPixels,
-  createRig,
   makeCel,
   makeLayer,
   MAX_PIXELS,
@@ -9,13 +8,12 @@ import {
   PALETTES,
   paletteText,
   parsePalette,
-  spritePixels,
   swapPalette,
   THEMES,
   TOOLS,
 } from "./model";
 import { download } from "./export";
-import { Thumbnail } from "./PixelCanvas";
+import { HUMAN_CHARACTERS, BACKGROUNDS, PROPS } from "./catalog";
 import NumberField from "./NumberField";
 
 export function ToolPanel({
@@ -36,7 +34,7 @@ export function ToolPanel({
       : []),
   ];
   return (
-    <section className="ps-panel-section">
+    <section className="ps-panel-section ps-tools-panel">
       <div className="ps-section-label">01 / YOUR TOOLS</div>
       <div className="ps-tool-grid">
         {tools.map(([id, icon, name, key]) => (
@@ -81,6 +79,18 @@ export function ToolPanel({
           </select>
         </label>
       )}
+      {tool === "terrain" && (
+        <label className="ps-check">
+          <input
+            type="checkbox"
+            checked={!!options.eraseTerrain}
+            onChange={(e) =>
+              setOptions({ ...options, eraseTerrain: e.target.checked })
+            }
+          />
+          Erase terrain
+        </label>
+      )}
       <div className="ps-section-label ps-spaced">DRAWING AIDS</div>
       <div className="ps-toggle-grid">
         {[
@@ -100,8 +110,8 @@ export function ToolPanel({
         ))}
       </div>
       <p className="ps-small">
-        Right-click to erase. Drag to draw.
-        <br />⌘ / Ctrl Z to undo.
+        Drag to draw. Choose Eraser to remove pixels, or enable Erase terrain
+        with Autotile. Right-click also erases.
       </p>
     </section>
   );
@@ -118,6 +128,7 @@ export function PalettePanel({
 }) {
   const input = useRef(null),
     [format, setFormat] = useState("hex");
+  const [colorTarget, setColorTarget] = useState("primary");
   async function importPalette(event) {
     const file = event.target.files[0];
     event.target.value = "";
@@ -140,7 +151,7 @@ export function PalettePanel({
     }
   }
   return (
-    <section className="ps-panel-section">
+    <section className="ps-panel-section ps-palette-panel">
       <div className="ps-section-heading">
         <div className="ps-section-label">02 / COLOR PALETTE</div>
         <span className="ps-count">{project.palette.length}</span>
@@ -171,6 +182,22 @@ export function PalettePanel({
           Custom palette
         </option>
       </select>
+      <div
+        className="ps-palette-targets"
+        role="group"
+        aria-label="Choose which color to set"
+      >
+        {["primary", "secondary"].map((target) => (
+          <button
+            key={target}
+            aria-pressed={colorTarget === target}
+            className={colorTarget === target ? "active" : ""}
+            onClick={() => setColorTarget(target)}
+          >
+            {target === "primary" ? "Primary" : "Secondary"}
+          </button>
+        ))}
+      </div>
       <div className="ps-swatches">
         {project.palette.map((value, i) => (
           <button
@@ -179,8 +206,10 @@ export function PalettePanel({
             className={`${color === i ? "selected" : ""} ${secondary === i ? "secondary" : ""}`}
             title={`${value} · index ${i}. Right-click for secondary color.`}
             aria-label={`Color ${i + 1}: ${value}`}
-            aria-pressed={color === i}
-            onClick={() => setColor(i)}
+            aria-pressed={(colorTarget === "primary" ? color : secondary) === i}
+            onClick={() =>
+              (colorTarget === "primary" ? setColor : setSecondary)(i)
+            }
             onContextMenu={(e) => {
               e.preventDefault();
               setSecondary(i);
@@ -229,8 +258,8 @@ export function PalettePanel({
         </label>
       )}
       <p className="ps-small">
-        Palette swaps update every frame and character part. Right-click a
-        swatch for the second dither color.
+        Choose Primary or Secondary, then a swatch. The secondary color is used
+        for dithering and patterns. Palette swaps update every frame and part.
       </p>
       <input
         type="file"
@@ -456,15 +485,11 @@ export function LayerPanel({ project, update, selected, setSelected, notify }) {
 
 export function LibraryPanel({
   project,
-  frame,
-  layer,
   update,
   selectedPart,
-  setSelectedPart,
   setTool,
-  notify,
+  onBrowse,
 }) {
-  const [archetype, setArchetype] = useState("Knight");
   function reskin(style) {
     update((p) => {
       const part = p.rig.find((r) => r.id === selectedPart) || p.rig[0];
@@ -521,103 +546,29 @@ export function LibraryPanel({
   }
   return (
     <section className="ps-panel-section">
-      <div className="ps-section-label">MADE FOR A HEAD START</div>
-      <h3 className="ps-spaced">
-        {project.mode === "puppet"
-          ? "Character & part library"
-          : project.mode === "background"
-            ? "Background library"
-            : "Little starting points"}
-      </h3>
-      {project.mode === "sprite" && (
-        <>
-          <p className="ps-small">
-            Add a little character to the selected layer in this frame.
-          </p>
-          <div className="ps-sprite-library">
-            {["Sprout", "Crystal", "Heart"].map((name) => {
-              const sample = {
-                ...project,
-                mode: "sprite",
-                layers: [project.layers.find((l) => l.id === layer)],
-                frames: [
-                  {
-                    cels: {
-                      [layer]: {
-                        pixels: spritePixels(
-                          project.width,
-                          project.height,
-                          project.palette,
-                          name,
-                        ),
-                        tiles: {},
-                      },
-                    },
-                    pose: {},
-                  },
-                ],
-              };
-              return (
-                <button
-                  key={name}
-                  disabled={project.layers.find((l) => l.id === layer).locked}
-                  onClick={() =>
-                    update((p) => {
-                      p.frames[frame].cels[layer].pixels = spritePixels(
-                        p.width,
-                        p.height,
-                        p.palette,
-                        name,
-                      );
-                    })
-                  }
-                >
-                  <Thumbnail project={sample} />
-                  <span>{name}</span>
-                </button>
-              );
-            })}
-          </div>
-        </>
-      )}
+      <div className="ps-section-label">MADE FOR YOUR NEXT STORY</div>
+      <h3 className="ps-spaced">Characters, worlds & little things</h3>
+      <p className="ps-small">
+        From a fantasy quest to a first café date. Find a cast and a setting,
+        then make every pixel yours.
+      </p>
+      <div className="ps-library-summary">
+        <span>
+          <strong>{HUMAN_CHARACTERS.length}</strong> humans
+        </span>
+        <span>
+          <strong>{BACKGROUNDS.length}</strong> scenes
+        </span>
+        <span>
+          <strong>{PROPS.length}</strong> props
+        </span>
+      </div>
+      <button className="ps-primary ps-wide" onClick={onBrowse}>
+        Browse library →
+      </button>
+      <p className="ps-small">Fantasy · Cozy · School life · Romcom</p>
       {project.mode === "puppet" && (
         <>
-          <label>
-            Character base
-            <select
-              value={archetype}
-              onChange={(e) => setArchetype(e.target.value)}
-            >
-              {[
-                "Humanoid male",
-                "Humanoid female",
-                "Knight",
-                "Goblin",
-                "Quadruped",
-              ].map((a) => (
-                <option key={a}>{a}</option>
-              ))}
-            </select>
-          </label>
-          <button
-            className="ps-wide"
-            onClick={() => {
-              update((p) => {
-                p.rig = createRig(archetype, p.width, p.height, p.palette);
-                p.frames.forEach((f) => {
-                  f.pose = {};
-                });
-              });
-              setSelectedPart("torso");
-              setTool("pose");
-              notify("Character base replaced. Undo is available.");
-            }}
-          >
-            Use character base
-          </button>
-          <p className="ps-small">
-            Replaces this rig and its poses. Artwork layers are kept.
-          </p>
           <div className="ps-section-label ps-spaced">RESKIN SELECTED PART</div>
           <div className="ps-inline-actions">
             {["Hair", "Armor", "Blade"].map((s) => (
@@ -634,6 +585,7 @@ export function LibraryPanel({
       )}
       {project.mode === "background" && (
         <>
+          <h3 className="ps-spaced">Terrain themes</h3>
           <div className="ps-theme-list">
             {Object.entries(THEMES).map(([name, colors]) => (
               <button
