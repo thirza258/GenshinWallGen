@@ -50,7 +50,7 @@ const PRESETS = [
       { id: "pw3", text: "Spiral Abyss Floor 9-12 Stars Check", done: false },
     ],
     notes: "Talent Book Days: Tue/Fri (Guide to Equity). Condensed resin cap: 5/5.",
-    image: "Splashscreen_Masquerade_of_the_Guilty.png",
+    image: "4.2 - Masquerade of the Guilty.png",
   },
   {
     id: "boss_hunter",
@@ -68,7 +68,7 @@ const PRESETS = [
       { id: "pw7", text: "Weekly Teapot Transient Resin Purchase", done: false },
     ],
     notes: "Talents target: 9/9/9. Farm Weapon domain on Wednesday & Saturday.",
-    image: "5.0 Launcher Art.png",
+    image: "5.0 - Flowers Resplendent on the Sun-Scorched Sojourn.png",
   },
   {
     id: "f2p_saver",
@@ -86,7 +86,7 @@ const PRESETS = [
       { id: "pw10", text: "Imaginarium Theater & Spiral Abyss Reset", done: false },
     ],
     notes: "Character Banner Pity: 68/90 (Guaranteed). Savings: 14,400 Primos (90 Fates).",
-    image: "Splashscreen_When_the_Sakura_Bloom.png",
+    image: "2.5 - When the Sakura Bloom.png",
   },
 ];
 
@@ -94,42 +94,42 @@ const SHOWCASE_CARDS = [
   {
     name: "Natlan: Saurian Champions",
     region: "Natlan (5.0+)",
-    file: "5.0 Launcher Art.png",
+    file: "5.0 - Flowers Resplendent on the Sun-Scorched Sojourn.png",
     color: "from-amber-600 to-red-700",
     desc: "Vibrant volcanic landscapes and brave Saurian companions from the Nation of Pyro.",
   },
   {
     name: "Fontaine: Masquerade of the Guilty",
     region: "Fontaine (4.2)",
-    file: "Splashscreen_Masquerade_of_the_Guilty.png",
+    file: "4.2 - Masquerade of the Guilty.png",
     color: "from-blue-700 to-indigo-900",
     desc: "The grandeur of the Opera Epiclese featuring Furina and the judgment of Fontaine.",
   },
   {
     name: "Inazuma: When the Sakura Bloom",
     region: "Inazuma (2.5)",
-    file: "Splashscreen_When_the_Sakura_Bloom.png",
+    file: "2.5 - When the Sakura Bloom.png",
     color: "from-purple-800 to-pink-700",
     desc: "Sacred Sakura blossoms, the Narukami Shrine, and eternal lightning.",
   },
   {
     name: "Liyue: Fleeting Colors in Flight",
     region: "Liyue (2.4)",
-    file: "Splashscreen_Fleeting_Colors_in_Flight.png",
+    file: "2.4 - Fleeting Colors in Flight.png",
     color: "from-amber-700 to-orange-900",
     desc: "Liyue Harbor illuminated by thousands of Lantern Rite lanterns and fireworks.",
   },
   {
     name: "Sumeru: Akasha Pulses & Kalpa Flame",
     region: "Sumeru (3.2)",
-    file: "Splashscreen_Akasha_Pulses2C_the_Kalpa_Flame_Rises.png",
+    file: "3.2 - Akasha Pulses, the Kalpa Flame Rises.png",
     color: "from-emerald-800 to-teal-950",
     desc: "The Sanctuary of Surasthana and the radiant wisdom of Lord Kusanali.",
   },
   {
     name: "Mondstadt: Welcome to Teyvat",
     region: "Mondstadt (1.0)",
-    file: "Splashscreen_Welcome_To_Teyvat.png",
+    file: "1.0 - Welcome to Teyvat.png",
     color: "from-sky-700 to-teal-800",
     desc: "The iconic cliffs of Starsnatch, Windrise tree, and the beginning of your journey.",
   },
@@ -139,25 +139,25 @@ const DEMO_THEMES = [
   {
     id: "natlan",
     label: "🔥 Natlan 5.0",
-    name: "5.0 Launcher Art.png",
+    name: "5.0 - Flowers Resplendent on the Sun-Scorched Sojourn.png",
     bgClass: "bg-gradient-to-br from-[#4A1517] via-[#2A1015] to-[#151D4D]",
   },
   {
     id: "fontaine",
     label: "🌊 Fontaine",
-    name: "Splashscreen_Masquerade_of_the_Guilty.png",
+    name: "4.2 - Masquerade of the Guilty.png",
     bgClass: "bg-gradient-to-br from-[#0F2847] via-[#151D4D] to-[#0A122A]",
   },
   {
     id: "inazuma",
     label: "⚡ Inazuma",
-    name: "Splashscreen_When_the_Sakura_Bloom.png",
+    name: "2.5 - When the Sakura Bloom.png",
     bgClass: "bg-gradient-to-br from-[#2D124D] via-[#1F1540] to-[#151D4D]",
   },
   {
     id: "liyue",
     label: "🪨 Liyue",
-    name: "Splashscreen_Fleeting_Colors_in_Flight.png",
+    name: "2.4 - Fleeting Colors in Flight.png",
     bgClass: "bg-gradient-to-br from-[#402610] via-[#2D1B0C] to-[#151D4D]",
   },
 ];
@@ -169,6 +169,7 @@ const LandingPage = ({
   onLoginClick,
   onLogout,
   onOpenPixelStudio,
+  onNavigateLegal,
 }) => {
   const [activeFaq, setActiveFaq] = useState(0);
   const [demoTheme, setDemoTheme] = useState(DEMO_THEMES[0]);
@@ -921,7 +922,7 @@ const LandingPage = ({
         <div className="max-w-7xl mx-auto px-5 sm:px-8 space-y-10">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Col 1 */}
-            <div className="space-y-3 md:col-span-2">
+            <div className="space-y-3 md:col-span-1">
               <div className="flex items-center gap-2.5 text-white font-mono text-base font-bold">
                 <span className="text-[#FFE8A3]">✦</span>
                 <span>GenshinWallCraft</span>
@@ -983,7 +984,7 @@ const LandingPage = ({
             {/* Col 3 */}
             <div className="space-y-3">
               <div className="text-white font-semibold font-mono text-xs uppercase tracking-wider">
-                Generator Studio
+                Creative Studios
               </div>
               <ul className="space-y-2 text-white/70">
                 <li>
@@ -992,6 +993,14 @@ const LandingPage = ({
                     className="hover:text-white transition-colors text-left"
                   >
                     ✦ Open Studio Generator
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={onOpenPixelStudio}
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    ✦ Open Pixel Studio
                   </button>
                 </li>
                 <li>
@@ -1009,13 +1018,79 @@ const LandingPage = ({
                 </li>
               </ul>
             </div>
+
+            {/* Col 4 */}
+            <div className="space-y-3">
+              <div className="text-white font-semibold font-mono text-xs uppercase tracking-wider">
+                Legal & Policies
+              </div>
+              <ul className="space-y-2 text-white/70">
+                <li>
+                  <a
+                    href="#privacy"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (onNavigateLegal) onNavigateLegal("privacy");
+                      else window.location.hash = "privacy";
+                    }}
+                    className="hover:text-white transition-colors"
+                  >
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#terms"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (onNavigateLegal) onNavigateLegal("terms");
+                      else window.location.hash = "terms";
+                    }}
+                    className="hover:text-white transition-colors"
+                  >
+                    Terms of Service
+                  </a>
+                </li>
+                <li className="text-[11px] text-white/40 pt-1">
+                  100% Free & Open-Source
+                </li>
+                <li className="text-[11px] text-white/40">
+                  No HoYoverse Passwords or UID
+                </li>
+              </ul>
+            </div>
           </div>
 
-          {/* Legal / Disclaimer Notice */}
-          <div className="pt-8 border-t border-white/10 text-[11px] text-white/40 leading-relaxed">
-            <p>
+          {/* Legal / Disclaimer Notice & Bottom Links */}
+          <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-[11px] text-white/40 leading-relaxed">
+            <p className="max-w-2xl">
               Disclaimer: GenshinWallCraft is not affiliated with, endorsed by, or sponsored by Cognosphere Pte., Ltd. or HoYoverse. Genshin Impact and all associated logos, artworks, and character designs are trademarks and copyrights of Cognosphere / HoYoverse.
             </p>
+            <div className="flex items-center gap-4 text-white/60 font-medium whitespace-nowrap">
+              <a
+                href="#privacy"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onNavigateLegal) onNavigateLegal("privacy");
+                  else window.location.hash = "privacy";
+                }}
+                className="hover:text-white transition-colors"
+              >
+                Privacy Policy
+              </a>
+              <span>•</span>
+              <a
+                href="#terms"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onNavigateLegal) onNavigateLegal("terms");
+                  else window.location.hash = "terms";
+                }}
+                className="hover:text-white transition-colors"
+              >
+                Terms of Service
+              </a>
+            </div>
           </div>
         </div>
       </footer>

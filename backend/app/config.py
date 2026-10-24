@@ -16,6 +16,6 @@ class AppConfig:
     CORS_ORIGINS = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://genshinwallpaper.nevatal.tech"
+        "https://genshinwallpaper.nevatal.id"
     ]
     TASKS_FILE = "tasks.json"

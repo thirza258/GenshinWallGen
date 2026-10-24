@@ -1,9 +1,22 @@
 # Robots.txt for GenshinWallCraft
 User-agent: *
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
 Allow: /
+Allow: /generator
+Allow: /pixel-studio
+Allow: /privacy
+Allow: /terms
 Allow: /#generator
+Allow: /#pixel-studio
+Allow: /#features
+Allow: /#showcase
+Allow: /#presets
+Allow: /#how-it-works
+Allow: /#faq
+Allow: /#privacy
+Allow: /#terms
 Allow: /ui_items.png
 Allow: /icons.svg
 
 # Sitemaps
-Sitemap: https://genshinwallpaper.nevatal.tech/sitemap.xml
+Sitemap: https://genshinwallpaper.nevatal.id/sitemap.xml

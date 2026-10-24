@@ -6,10 +6,18 @@ import StatusBar from "./components/StatusBar";
 import ToastContainer from "./components/ToastContainer";
 import AuthModal from "./components/AuthModal";
 import LandingPage from "./components/LandingPage";
+import LegalPage from "./components/LegalPage";
 
 const PixelStudio = lazy(() => import("./pixel/PixelStudio"));
-const pageFromHash = () => window.location.hash.startsWith("#pixel-studio")
-  ? "pixel" : window.location.hash.startsWith("#generator") ? "generator" : "landing";
+const pageFromHash = () => {
+  const hash = window.location.hash;
+  const path = window.location.pathname.replace(/\/$/, "");
+  if (hash.startsWith("#pixel-studio") || path === "/pixel-studio") return "pixel";
+  if (hash.startsWith("#generator") || path === "/generator") return "generator";
+  if (hash.startsWith("#privacy") || path === "/privacy") return "privacy";
+  if (hash.startsWith("#terms") || path === "/terms") return "terms";
+  return "landing";
+};
 
 const generateId = () =>
   Date.now().toString(36) + Math.random().toString(36).substring(2);
@@ -64,13 +72,17 @@ const App = () => {
 
   const isAuthenticated = !!token;
 
-  // Listen to hash changes for browser back/forward and deep linking
+  // Listen to hash and popstate changes for browser back/forward and deep linking
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleLocationChange = () => {
       setCurrentPage(pageFromHash());
     };
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
+    window.addEventListener("hashchange", handleLocationChange);
+    window.addEventListener("popstate", handleLocationChange);
+    return () => {
+      window.removeEventListener("hashchange", handleLocationChange);
+      window.removeEventListener("popstate", handleLocationChange);
+    };
   }, []);
 
   // Save guest tasks to localStorage when not authenticated
@@ -417,7 +429,11 @@ const App = () => {
 
   const handleNavigateHome = () => {
     setCurrentPage("landing");
-    window.location.hash = "";
+    if (window.location.pathname !== "/" && window.location.pathname !== "") {
+      window.history.pushState(null, "", "/");
+    } else {
+      window.location.hash = "";
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -427,7 +443,13 @@ const App = () => {
     window.scrollTo({ top: 0 });
   };
 
-  if (isLoadingInitial && currentPage !== "pixel") {
+  const handleNavigateLegal = (type) => {
+    setCurrentPage(type);
+    window.location.hash = type;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (isLoadingInitial && currentPage !== "pixel" && currentPage !== "privacy" && currentPage !== "terms") {
     return (
       <div className="min-h-screen bg-[#FDE7CE] flex items-center justify-center">
         <div className="w-10 h-10 border-[3px] border-[#151D4D]/20 border-t-[#151D4D] rounded-full animate-spin"></div>
@@ -445,6 +467,16 @@ const App = () => {
           isAuthenticated={isAuthenticated}
           onLoginClick={() => setShowAuthModal(true)}
           onLogout={handleLogout}
+          onOpenPixelStudio={handleOpenPixelStudio}
+          onNavigateLegal={handleNavigateLegal}
+        />
+      ) : currentPage === "privacy" || currentPage === "terms" ? (
+        /* ─── PAGE: PRIVACY & TERMS ─── */
+        <LegalPage
+          key={currentPage}
+          initialTab={currentPage}
+          onNavigateHome={handleNavigateHome}
+          onOpenGenerator={() => handleGetStarted()}
           onOpenPixelStudio={handleOpenPixelStudio}
         />
       ) : currentPage === "pixel" ? (
