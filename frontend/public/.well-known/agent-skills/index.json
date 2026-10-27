@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "generate-wallpaper",
+      "type": "skill-md",
+      "description": "Generate a new wallpaper from a character or scene prompt.",
+      "url": "https://genshinwallpaper.nevatal.id/.well-known/agent-skills/generate-wallpaper/SKILL.md"
+    },
+    {
+      "name": "browse-gallery",
+      "type": "skill-md",
+      "description": "Browse the public wallpaper gallery.",
+      "url": "https://genshinwallpaper.nevatal.id/.well-known/agent-skills/browse-gallery/SKILL.md"
+    }
+  ]
+}

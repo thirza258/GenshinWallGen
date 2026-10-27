@@ -1,0 +1,28 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Genshin Wallpaper Generator",
+    "identifier": "did:web:genshinwallpaper.nevatal.id"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:genshinwallpaper.nevatal.id:api:site",
+      "displayName": "Genshin Wallpaper Generator API",
+      "type": "application/json",
+      "url": "https://genshinwallpaper.nevatal.id/api/",
+      "representativeQueries": [
+        "what does Genshin Wallpaper Generator do",
+        "get data from Genshin Wallpaper Generator"
+      ]
+    },
+    {
+      "identifier": "urn:air:genshinwallpaper.nevatal.id:server:mcp",
+      "displayName": "Genshin Wallpaper Generator MCP Server",
+      "type": "application/mcp-server-card+json",
+      "url": "https://genshinwallpaper.nevatal.id/.well-known/mcp/server-card.json",
+      "representativeQueries": [
+        "query Genshin Wallpaper Generator"
+      ]
+    }
+  ]
+}

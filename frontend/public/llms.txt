@@ -1,0 +1,11 @@
+# Genshin Wallpaper Generator
+
+> Generate and browse AI wallpapers inspired by Genshin Impact characters and scenes.
+
+## Endpoints
+- Homepage: https://genshinwallpaper.nevatal.id/
+- API: https://genshinwallpaper.nevatal.id/api/
+- API Catalog: https://genshinwallpaper.nevatal.id/.well-known/api-catalog
+- Agent Card: https://genshinwallpaper.nevatal.id/.well-known/agent-card.json
+- AI Catalog: https://genshinwallpaper.nevatal.id/.well-known/ai-catalog.json
+- Authentication Guide: https://genshinwallpaper.nevatal.id/auth.md

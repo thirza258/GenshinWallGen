@@ -167,5 +167,31 @@
     <script type="text/javascript"> var infolinks_pid = 3448935; var infolinks_wsid = 0; </script>
     <script type="text/javascript" src="//resources.infolinks.com/js/infolinks_main.js"></script>
     <script type="module" src="/src/main.jsx"></script>
-  </body>
+  <script id="webmcp-tools">
+  (function () {
+    const tools = [
+      {
+        name: "get_genshin_wallpaper_generator_info",
+        description: "Get the site name, description and API location for Genshin Wallpaper Generator.",
+        inputSchema: { type: "object", properties: {} },
+        execute: async function () {
+          const res = await fetch("/.well-known/agent-card.json");
+          return await res.json();
+        }
+      }
+    ];
+    const mc = (typeof navigator !== "undefined" && navigator.modelContext) ||
+      (typeof document !== "undefined" && document.modelContext);
+    if (!mc) return;
+    if (typeof mc.provideContext === "function") {
+      try { mc.provideContext({ tools: tools }); } catch (e) {}
+    }
+    if (typeof mc.registerTool === "function") {
+      tools.forEach(function (tool) {
+        try { mc.registerTool(tool); } catch (e) {}
+      });
+    }
+  })();
+</script>
+</body>
 </html>

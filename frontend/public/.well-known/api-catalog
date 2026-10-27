@@ -1,0 +1,25 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://genshinwallpaper.nevatal.id/api",
+      "service-desc": [
+        {
+          "href": "https://genshinwallpaper.nevatal.id/api/",
+          "type": "application/json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://genshinwallpaper.nevatal.id/auth.md",
+          "type": "text/markdown"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://genshinwallpaper.nevatal.id/api/",
+          "type": "application/json"
+        }
+      ]
+    }
+  ]
+}

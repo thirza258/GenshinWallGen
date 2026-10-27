@@ -1,0 +1,19 @@
+{
+  "serverInfo": {
+    "name": "genshin-wallpaper-generator-mcp",
+    "version": "1.0.0"
+  },
+  "endpoint": "https://genshinwallpaper.nevatal.id/mcp",
+  "capabilities": {
+    "tools": {
+      "listChanged": false
+    },
+    "resources": {
+      "subscribe": false,
+      "listChanged": false
+    },
+    "prompts": {
+      "listChanged": false
+    }
+  }
+}

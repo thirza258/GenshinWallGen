@@ -1,0 +1,45 @@
+{
+  "name": "Genshin Wallpaper Generator Agent",
+  "description": "Generate and browse AI wallpapers inspired by Genshin Impact characters and scenes.",
+  "url": "https://genshinwallpaper.nevatal.id",
+  "provider": {
+    "name": "Nevatal",
+    "url": "https://genshinwallpaper.nevatal.id"
+  },
+  "version": "1.0.0",
+  "protocolVersion": "0.3.0",
+  "preferredTransport": "JSONRPC",
+  "supportedInterfaces": [
+    {
+      "url": "https://genshinwallpaper.nevatal.id/api",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "0.3.0"
+    }
+  ],
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "defaultInputModes": [
+    "text/plain"
+  ],
+  "defaultOutputModes": [
+    "text/plain"
+  ],
+  "skills": [
+    {
+      "id": "generate-wallpaper",
+      "name": "Generate Wallpaper",
+      "description": "Generate a new wallpaper from a character or scene prompt."
+    },
+    {
+      "id": "browse-gallery",
+      "name": "Browse Gallery",
+      "description": "Browse the public wallpaper gallery."
+    }
+  ],
+  "authentication": {
+    "type": "oauth2",
+    "discovery_url": "https://genshinwallpaper.nevatal.id/.well-known/oauth-authorization-server"
+  }
+}

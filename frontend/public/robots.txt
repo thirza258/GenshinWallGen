@@ -20,3 +20,4 @@ Allow: /icons.svg
 
 # Sitemaps
 Sitemap: https://genshinwallpaper.nevatal.id/sitemap.xml
+Agentmap: https://genshinwallpaper.nevatal.id/.well-known/ai-catalog.json

@@ -1,0 +1,46 @@
+{
+  "protocol_version": "0.1",
+  "organization": {
+    "name": "Nevatal",
+    "domain": "genshinwallpaper.nevatal.id"
+  },
+  "auth": {
+    "issuer": "https://genshinwallpaper.nevatal.id",
+    "direct": {
+      "scopes": [
+        "poppy:read",
+        "poppy:write"
+      ]
+    },
+    "device": {
+      "scopes": [
+        "poppy:read",
+        "poppy:write"
+      ]
+    }
+  },
+  "agent": {
+    "protocols": [
+      {
+        "type": "poppy",
+        "endpoint": "https://genshinwallpaper.nevatal.id/api/"
+      }
+    ]
+  },
+  "apis": [
+    {
+      "type": "openapi",
+      "url": "https://genshinwallpaper.nevatal.id/api/",
+      "description": "Genshin Wallpaper Generator API"
+    },
+    {
+      "type": "mcp",
+      "url": "https://genshinwallpaper.nevatal.id/mcp",
+      "description": "Genshin Wallpaper Generator MCP server"
+    }
+  ],
+  "web": {
+    "browser_session_endpoint": "https://genshinwallpaper.nevatal.id/"
+  },
+  "extensions": {}
+}
