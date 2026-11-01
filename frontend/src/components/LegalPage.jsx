@@ -259,9 +259,26 @@ const LegalPage = ({
                   </li>
                   <li>
                     To request the complete deletion of your account and all associated
-                    data, please open an issue or contact our maintainers.
+                    data, please email our maintainers at{" "}
+                    <a href="mailto:nevatalapp@gmail.com" className="text-[#C58B35] font-semibold hover:underline">
+                      nevatalapp@gmail.com
+                    </a>
+                    .
                   </li>
                 </ul>
+              </section>
+
+              <section className="space-y-3">
+                <h2 className="text-xl font-bold text-[#151D4D]">
+                  7. Privacy Contact &amp; Inquiries
+                </h2>
+                <p>
+                  For any privacy questions, data deletion requests, or technical inquiries regarding this self-hosted deployment, please contact our team directly at{" "}
+                  <a href="mailto:nevatalapp@gmail.com" className="text-[#C58B35] font-semibold hover:underline">
+                    nevatalapp@gmail.com
+                  </a>
+                  .
+                </p>
               </section>
             </div>
           ) : (
@@ -372,6 +389,19 @@ const LegalPage = ({
                   occur, the "Effective Date" at the top of this page will be revised.
                   Your continued use of GenshinWallCraft after revisions signifies
                   acceptance of the updated terms.
+                </p>
+              </section>
+
+              <section className="space-y-3">
+                <h2 className="text-xl font-bold text-[#151D4D]">
+                  8. Contact &amp; Legal Notices
+                </h2>
+                <p>
+                  If you have questions regarding these Terms of Service or fair-use guidelines, reach out to us at{" "}
+                  <a href="mailto:nevatalapp@gmail.com" className="text-[#C58B35] font-semibold hover:underline">
+                    nevatalapp@gmail.com
+                  </a>
+                  .
                 </p>
               </section>
             </div>
