@@ -226,16 +226,19 @@ const LegalPage = ({
 
               <section className="space-y-3">
                 <h2 className="text-xl font-bold text-[#151D4D]">
-                  5. Intellectual Property & HoYoverse Rights
+                  5. Intellectual Property &amp; Fan Project Disclaimer
                 </h2>
+                <div className="bg-[#FDE7CE]/40 border-l-4 border-[#C58B35] p-4 rounded-r-lg text-xs sm:text-sm text-[#151D4D]">
+                  <strong>Disclaimer:</strong> GenshinWallGen is an unofficial fan-made project and is not affiliated with or endorsed by Cognosphere / miHoYo. All Genshin Impact assets and trademarks belong to their respective owners.
+                </div>
                 <p>
-                  GenshinWallCraft is an open-source, non-profit fan project. All Genshin
+                  GenshinWallGen is an open-source, non-profit fan project. All Genshin
                   Impact artwork, splashscreens, character designs, game assets, and
                   associated trademarks are the intellectual property of{" "}
-                  <strong>Cognosphere Pte., Ltd. / HoYoverse</strong>.
+                  <strong>Cognosphere Pte., Ltd. / miHoYo / HoYoverse</strong>.
                 </p>
                 <p>
-                  We claim no ownership over official HoYoverse assets. User-generated
+                  We claim no ownership over official HoYoverse / miHoYo assets. User-generated
                   pixel art created in Pixel Studio remains the creative property of its
                   respective authors.
                 </p>
@@ -303,17 +306,13 @@ const LegalPage = ({
                 <h2 className="text-xl font-bold text-[#151D4D]">
                   2. Non-Commercial Fan Project Disclaimer
                 </h2>
+                <div className="bg-[#FDE7CE]/40 border-l-4 border-[#151D4D] p-4 rounded-r-lg text-xs sm:text-sm text-[#151D4D]">
+                  <strong>Disclaimer:</strong> GenshinWallGen is an unofficial fan-made project and is not affiliated with or endorsed by Cognosphere / miHoYo. All Genshin Impact assets and trademarks belong to their respective owners.
+                </div>
                 <p>
                   GenshinWallCraft is a free, non-commercial, open-source productivity
                   organizer created by fans for fans.
                 </p>
-                <div className="bg-[#FDE7CE]/40 border-l-4 border-[#151D4D] p-4 rounded-r-lg text-xs sm:text-sm text-[#151D4D]">
-                  <strong>Disclaimer:</strong> This project is not affiliated with,
-                  endorsed by, or sponsored by Cognosphere Pte., Ltd. or HoYoverse.
-                  Genshin Impact™ is a registered trademark of Cognosphere / HoYoverse.
-                  All rights to official game artwork, character illustrations, and logos
-                  belong to their respective owners.
-                </div>
               </section>
 
               <section className="space-y-3">
@@ -445,10 +444,7 @@ const LegalPage = ({
             </div>
           </div>
           <div className="text-[11px] text-white/40 pt-4 border-t border-white/10 leading-relaxed">
-            Disclaimer: GenshinWallCraft is not affiliated with, endorsed by, or sponsored
-            by Cognosphere Pte., Ltd. or HoYoverse. Genshin Impact and all associated logos,
-            artworks, and character designs are trademarks and copyrights of Cognosphere /
-            HoYoverse.
+            Disclaimer: GenshinWallGen is an unofficial fan-made project and is not affiliated with or endorsed by Cognosphere / miHoYo. All Genshin Impact assets and trademarks belong to their respective owners.
           </div>
         </div>
       </footer>

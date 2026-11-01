@@ -132,3 +132,7 @@ Fresh volumes are initialized once from the bundled database. Existing persisten
 - The frontend talks to the backend through the `/api` path in the Nginx config.
 - The backend creates the MinIO bucket on demand.
 - The daily WhatsApp job is optional and only matters if you configure the WhatsApp environment variables.
+
+## Disclaimer
+
+GenshinWallGen is an unofficial fan-made project and is not affiliated with or endorsed by Cognosphere / miHoYo. All Genshin Impact assets and trademarks belong to their respective owners.

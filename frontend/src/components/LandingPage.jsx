@@ -1064,7 +1064,7 @@ const LandingPage = ({
           {/* Legal / Disclaimer Notice & Bottom Links */}
           <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-[11px] text-white/40 leading-relaxed">
             <p className="max-w-2xl">
-              Disclaimer: GenshinWallCraft is not affiliated with, endorsed by, or sponsored by Cognosphere Pte., Ltd. or HoYoverse. Genshin Impact and all associated logos, artworks, and character designs are trademarks and copyrights of Cognosphere / HoYoverse.
+              Disclaimer: GenshinWallGen is an unofficial fan-made project and is not affiliated with or endorsed by Cognosphere / miHoYo. All Genshin Impact assets and trademarks belong to their respective owners.
             </p>
             <div className="flex items-center gap-4 text-white/60 font-medium whitespace-nowrap">
               <a
