@@ -444,7 +444,7 @@ const LegalPage = ({
             </div>
           </div>
           <div className="text-[11px] text-white/40 pt-4 border-t border-white/10 leading-relaxed">
-            Disclaimer: GenshinWallGen is an unofficial fan-made project and is not affiliated with or endorsed by Cognosphere / miHoYo. All Genshin Impact assets and trademarks belong to their respective owners.
+            Disclaimer: GenshinWallGen is an unofficial fan-made project and is not affiliated with or endorsed by Cognosphere / miHoYo. All Genshin Impact assets and trademarks belong to their respective owners. This project is under <a href="https://nevatal.id" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">nevatal.id</a> for educational purposes.
           </div>
         </div>
       </footer>

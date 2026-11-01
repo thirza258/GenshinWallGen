@@ -1064,7 +1064,7 @@ const LandingPage = ({
           {/* Legal / Disclaimer Notice & Bottom Links */}
           <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-[11px] text-white/40 leading-relaxed">
             <p className="max-w-2xl">
-              Disclaimer: GenshinWallGen is an unofficial fan-made project and is not affiliated with or endorsed by Cognosphere / miHoYo. All Genshin Impact assets and trademarks belong to their respective owners.
+              Disclaimer: GenshinWallGen is an unofficial fan-made project and is not affiliated with or endorsed by Cognosphere / miHoYo. All Genshin Impact assets and trademarks belong to their respective owners. This project is under <a href="https://nevatal.id" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">nevatal.id</a> for educational purposes.
             </p>
             <div className="flex items-center gap-4 text-white/60 font-medium whitespace-nowrap">
               <a
