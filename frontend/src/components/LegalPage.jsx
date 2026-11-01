@@ -140,6 +140,9 @@ const LegalPage = ({
                   account credentials, email passwords, or authentication cookies.
                   You type your own tasks and notes.
                 </div>
+                <div className="bg-[#151D4D]/5 border-l-4 border-[#151D4D] p-4 rounded-r-lg text-xs sm:text-sm text-[#151D4D]">
+                  <strong>🖥️ Fully Self-Hosted Platform:</strong> This application is fully self-hosted on private infrastructure. Your data stays strictly on this self-hosted platform and is not sold, transferred, or sent to external cloud brokers. GenshinWallCraft operates with complete local data sovereignty.
+                </div>
               </section>
 
               <section className="space-y-3">
