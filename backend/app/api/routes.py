@@ -2,8 +2,10 @@ from datetime import datetime
 from pathlib import Path
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse
 import io
+import os
+from urllib.parse import unquote
 from sqlalchemy.orm import Session
 from app.models.task import TasksPayload, UserImage
 from app.services.task_service import load_tasks, update_tasks
@@ -28,6 +30,29 @@ async def serve_ui():
 async def get_source_images():
     images = wallpaper_gen.list_source_images()
     return {"images": images}
+
+@router.get("/api/source-images/{filename:path}")
+@router.head("/api/source-images/{filename:path}")
+async def get_source_image_file(filename: str):
+    decoded_name = unquote(filename)
+    safe_name = os.path.basename(decoded_name)
+    file_path = (wallpaper_gen.WALLPAPER_SOURCE / safe_name).resolve()
+    try:
+        source_dir = wallpaper_gen.WALLPAPER_SOURCE.resolve()
+        if not file_path.is_relative_to(source_dir):
+            raise HTTPException(status_code=403, detail="Forbidden")
+    except (ValueError, RuntimeError):
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="Image not found")
+
+    media_type = "image/png" if file_path.suffix.lower() == ".png" else "image/jpeg"
+    return FileResponse(
+        str(file_path),
+        media_type=media_type,
+        headers={"Cache-Control": "public, max-age=86400"}
+    )
 
 @router.get("/api/tasks")
 async def get_tasks(current_user: User = Depends(get_current_user)):

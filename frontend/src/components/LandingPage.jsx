@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const FAQ_ITEMS = [
   {
@@ -135,34 +135,75 @@ const SHOWCASE_CARDS = [
   },
 ];
 
-const DEMO_THEMES = [
+const HERO_SLIDES = [
   {
     id: "natlan",
     label: "🔥 Natlan 5.0",
     name: "5.0 - Flowers Resplendent on the Sun-Scorched Sojourn.png",
+    title: "Flowers Resplendent on the Sun-Scorched Sojourn",
+    region: "Natlan (5.0)",
     bgClass: "bg-gradient-to-br from-[#4A1517] via-[#2A1015] to-[#151D4D]",
+    ambientGlow: "from-amber-600/35 via-red-900/30 to-[#151D4D]/25",
+    accentColor: "#F59E0B",
   },
   {
     id: "fontaine",
     label: "🌊 Fontaine",
     name: "4.2 - Masquerade of the Guilty.png",
+    title: "Masquerade of the Guilty",
+    region: "Fontaine (4.2)",
     bgClass: "bg-gradient-to-br from-[#0F2847] via-[#151D4D] to-[#0A122A]",
+    ambientGlow: "from-blue-600/35 via-indigo-900/30 to-[#151D4D]/25",
+    accentColor: "#38BDF8",
+  },
+  {
+    id: "sumeru",
+    label: "🌿 Sumeru",
+    name: "3.0 - The Morn a Thousand Roses Brings.png",
+    title: "The Morn a Thousand Roses Brings",
+    region: "Sumeru (3.0)",
+    bgClass: "bg-gradient-to-br from-[#0F382A] via-[#152B20] to-[#151D4D]",
+    ambientGlow: "from-emerald-600/35 via-teal-900/30 to-[#151D4D]/25",
+    accentColor: "#34D399",
   },
   {
     id: "inazuma",
     label: "⚡ Inazuma",
     name: "2.5 - When the Sakura Bloom.png",
+    title: "When the Sakura Bloom",
+    region: "Inazuma (2.5)",
     bgClass: "bg-gradient-to-br from-[#2D124D] via-[#1F1540] to-[#151D4D]",
+    ambientGlow: "from-purple-600/35 via-violet-900/30 to-[#151D4D]/25",
+    accentColor: "#C084FC",
   },
   {
     id: "liyue",
     label: "🪨 Liyue",
     name: "2.4 - Fleeting Colors in Flight.png",
+    title: "Fleeting Colors in Flight",
+    region: "Liyue (2.4)",
     bgClass: "bg-gradient-to-br from-[#402610] via-[#2D1B0C] to-[#151D4D]",
+    ambientGlow: "from-amber-600/35 via-yellow-900/30 to-[#151D4D]/25",
+    accentColor: "#FBBF24",
+  },
+  {
+    id: "mondstadt",
+    label: "🍃 Mondstadt",
+    name: "1.0 - Welcome to Teyvat.png",
+    title: "Welcome to Teyvat",
+    region: "Mondstadt (1.0)",
+    bgClass: "bg-gradient-to-br from-[#123048] via-[#18263E] to-[#151D4D]",
+    ambientGlow: "from-sky-600/35 via-cyan-900/30 to-[#151D4D]/25",
+    accentColor: "#7DD3FC",
   },
 ];
 
+const DEMO_THEMES = HERO_SLIDES;
+
+const SLIDE_DURATION = 5500; // 5.5 seconds per slide
+
 const LandingPage = ({
+  backendUrl,
   onGetStarted,
   onApplyPreset,
   isAuthenticated,
@@ -171,8 +212,78 @@ const LandingPage = ({
   onOpenPixelStudio,
   onNavigateLegal,
 }) => {
+  const resolvedBackendUrl =
+    backendUrl ||
+    import.meta.env.VITE_BACKEND_URL ||
+    (typeof window !== "undefined"
+      ? `${window.location.protocol}//${window.location.hostname}:8009/api`
+      : "http://localhost:8009/api");
+
   const [activeFaq, setActiveFaq] = useState(0);
-  const [demoTheme, setDemoTheme] = useState(DEMO_THEMES[0]);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
+  const [slideProgress, setSlideProgress] = useState(0);
+
+  const activeSlide = HERO_SLIDES[currentSlideIndex] || HERO_SLIDES[0];
+
+  const getImageUrl = useCallback(
+    (name) => {
+      if (!name) return "";
+      return `${resolvedBackendUrl}/source-images/${encodeURIComponent(name)}`;
+    },
+    [resolvedBackendUrl],
+  );
+
+  const handleImageError = useCallback((e, name) => {
+    // If backend URL failed or returned error, try public local copy fallback
+    const fallbackUrl = `/source-images/${encodeURIComponent(name)}`;
+    if (
+      e.target &&
+      e.target.src !== window.location.origin + fallbackUrl &&
+      !e.target.dataset.triedFallback
+    ) {
+      e.target.dataset.triedFallback = "true";
+      e.target.src = fallbackUrl;
+    }
+  }, []);
+
+  // Preload hero slide images into cache
+  useEffect(() => {
+    HERO_SLIDES.forEach((slide) => {
+      const img = new Image();
+      img.src = getImageUrl(slide.name);
+    });
+  }, [getImageUrl]);
+
+  // Slideshow auto-advance timer with progress bar
+  useEffect(() => {
+    if (!isPlaying || isHovered) return;
+
+    const intervalTime = 60; // tick every 60ms for smooth progress bar
+    const step = (intervalTime / SLIDE_DURATION) * 100;
+
+    const timer = setInterval(() => {
+      setSlideProgress((prev) => {
+        if (prev >= 100) {
+          setCurrentSlideIndex((curr) => (curr + 1) % HERO_SLIDES.length);
+          return 0;
+        }
+        return prev + step;
+      });
+    }, intervalTime);
+
+    return () => clearInterval(timer);
+  }, [isPlaying, isHovered, currentSlideIndex]);
+
+  const goToSlide = (index) => {
+    setCurrentSlideIndex((index + HERO_SLIDES.length) % HERO_SLIDES.length);
+    setSlideProgress(0);
+  };
+
+  const nextSlide = () => goToSlide(currentSlideIndex + 1);
+  const prevSlide = () => goToSlide(currentSlideIndex - 1);
+
   const [demoTasks, setDemoTasks] = useState([
     { id: "d1", text: "4 Daily Commissions + Katheryne (+20 Primos)", done: true },
     { id: "d2", text: "Spend 160 Condensed Resin in Artifact Domain", done: true },
@@ -301,6 +412,34 @@ const LandingPage = ({
 
       {/* ─── HERO SECTION ─── */}
       <section className="relative overflow-hidden pt-12 pb-20 sm:pt-16 sm:pb-28">
+        {/* ─── HERO AMBIENT BACKGROUND SLIDESHOW ─── */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+          {HERO_SLIDES.map((slide, idx) => (
+            <div
+              key={`hero-bg-${slide.id}`}
+              className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+                idx === currentSlideIndex
+                  ? "opacity-35 scale-105"
+                  : "opacity-0 scale-100 pointer-events-none"
+              }`}
+            >
+              <img
+                src={getImageUrl(slide.name)}
+                onError={(e) => handleImageError(e, slide.name)}
+                alt=""
+                className="w-full h-full object-cover blur-3xl transform brightness-90 saturate-125"
+              />
+              <div
+                className={`absolute inset-0 bg-gradient-to-br ${slide.ambientGlow} mix-blend-multiply`}
+              ></div>
+            </div>
+          ))}
+
+          {/* Warm Vignette & Readability Gradient Layers */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#FDE7CE]/90 via-[#FDE7CE]/70 to-[#FDE7CE]"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-[#FDE7CE]/40 to-[#FDE7CE]"></div>
+        </div>
+
         {/* Subtle Decorative Stars */}
         <div className="absolute top-10 left-10 text-[#C58B35]/40 text-2xl animate-twinkle select-none pointer-events-none">
           ✦
@@ -312,7 +451,7 @@ const LandingPage = ({
           ✦
         </div>
 
-        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8">
           <div className="text-center max-w-3xl mx-auto space-y-6">
             {/* Pill Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#151D4D]/10 border border-[#151D4D]/20 text-xs font-semibold tracking-wide text-[#151D4D]">
@@ -379,7 +518,11 @@ const LandingPage = ({
           </div>
 
           {/* ─── INTERACTIVE LIVE WALLPAPER SIMULATOR / HERO MOCKUP ─── */}
-          <div className="mt-14 max-w-5xl mx-auto">
+          <div
+            className="mt-14 max-w-5xl mx-auto"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
             {/* Theme switcher bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-[#FFFCF3] border border-black/15 rounded-t-2xl p-3 px-5">
               <div className="flex items-center gap-2">
@@ -389,35 +532,93 @@ const LandingPage = ({
                 <span className="text-xs font-mono font-semibold text-[#151D4D]/70 ml-2 hidden sm:inline">
                   Interactive Live Simulator
                 </span>
+                {/* Active Slide Pill Badge */}
+                <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#151D4D]/5 border border-[#151D4D]/10 text-[11px] font-mono text-[#151D4D]/80">
+                  <span className="text-[#C58B35]">✦</span>
+                  <span className="max-w-[220px] truncate font-semibold">{activeSlide.region}</span>
+                </span>
               </div>
 
-              {/* Theme selector buttons */}
-              <div className="flex items-center gap-1.5 overflow-x-auto py-1">
-                <span className="text-xs text-[#151D4D]/60 mr-1 hidden md:inline">
-                  Region Theme:
-                </span>
-                {DEMO_THEMES.map((theme) => (
-                  <button
-                    key={theme.id}
-                    onClick={() => setDemoTheme(theme)}
-                    className={`px-3 py-1 text-xs rounded-lg font-semibold transition-all shrink-0 ${
-                      demoTheme.id === theme.id
-                        ? "bg-[#151D4D] text-[#FFFCF3] shadow-sm"
-                        : "bg-[#FDE7CE]/60 text-[#151D4D] hover:bg-[#FDE7CE]"
-                    }`}
-                  >
-                    {theme.label}
-                  </button>
-                ))}
+              {/* Controls & Region Themes */}
+              <div className="flex items-center gap-2 overflow-x-auto py-1">
+                {/* Play / Pause Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsPlaying((p) => !p)}
+                  title={isPlaying ? "Pause slideshow" : "Play slideshow"}
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg font-semibold bg-[#151D4D]/10 hover:bg-[#151D4D]/20 text-[#151D4D] transition-all shrink-0 cursor-pointer"
+                >
+                  <span className="text-[10px]">{isPlaying ? "⏸" : "▶"}</span>
+                  <span className="text-[11px] font-mono hidden sm:inline">{isPlaying ? "Pause" : "Play"}</span>
+                </button>
+
+                {/* Theme selector buttons */}
+                <div className="flex items-center gap-1.5">
+                  {HERO_SLIDES.map((slide, idx) => (
+                    <button
+                      key={slide.id}
+                      onClick={() => goToSlide(idx)}
+                      className={`px-3 py-1 text-xs rounded-lg font-semibold transition-all shrink-0 cursor-pointer ${
+                        currentSlideIndex === idx
+                          ? "bg-[#151D4D] text-[#FFFCF3] shadow-sm scale-105"
+                          : "bg-[#FDE7CE]/60 text-[#151D4D] hover:bg-[#FDE7CE]"
+                      }`}
+                    >
+                      {slide.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Desktop Mockup Screen */}
+            {/* Slideshow Progress Bar */}
+            <div className="w-full bg-[#151D4D]/10 h-1 overflow-hidden">
+              <div
+                className="bg-[#C58B35] h-full transition-all duration-75"
+                style={{ width: `${isPlaying && !isHovered ? slideProgress : 100}%` }}
+              ></div>
+            </div>
+
+            {/* Desktop Mockup Screen with Real Source Image Slideshow */}
             <div
-              className={`relative border-x border-b border-black/20 rounded-b-2xl overflow-hidden shadow-2xl p-4 sm:p-8 min-h-[460px] flex flex-col justify-between ${demoTheme.bgClass} transition-colors duration-500`}
+              className={`relative border-x border-b border-black/20 rounded-b-2xl overflow-hidden shadow-2xl p-4 sm:p-8 min-h-[480px] flex flex-col justify-between ${activeSlide.bgClass} transition-colors duration-700 group`}
             >
-              {/* Background ambient lights */}
-              <div className="absolute inset-0 bg-black/35 pointer-events-none"></div>
+              {/* Slideshow Images with Smooth Crossfade */}
+              {HERO_SLIDES.map((slide, idx) => (
+                <div
+                  key={`mockup-slide-${slide.id}`}
+                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                    idx === currentSlideIndex ? "opacity-100" : "opacity-0 pointer-events-none"
+                  }`}
+                >
+                  <img
+                    src={getImageUrl(slide.name)}
+                    onError={(e) => handleImageError(e, slide.name)}
+                    alt={slide.title}
+                    className="w-full h-full object-cover object-center transform transition-transform duration-1000 group-hover:scale-105"
+                  />
+                  {/* Subtle dark gradient overlay to ensure card readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/50 pointer-events-none"></div>
+                </div>
+              ))}
+
+              {/* Prev / Next Navigation Arrows on Mockup */}
+              <button
+                type="button"
+                onClick={prevSlide}
+                aria-label="Previous Slide"
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/75 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 shadow-xl hover:scale-110 cursor-pointer text-xl select-none"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={nextSlide}
+                aria-label="Next Slide"
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/75 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 shadow-xl hover:scale-110 cursor-pointer text-xl select-none"
+              >
+                ›
+              </button>
 
               {/* Inner Wallpaper Task Overlay Card Simulation */}
               <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl">
@@ -521,23 +722,59 @@ const LandingPage = ({
 
               {/* Bottom Quick-Launch Bar inside Mockup */}
               <div className="relative z-10 mt-6 pt-4 border-t border-white/20 flex flex-wrap items-center justify-between gap-4 text-white">
-                <div className="flex items-center gap-2 text-xs font-mono text-white/80">
-                  <span>✦ 3840×2160 Ultra 4K Canvas Output</span>
-                  <span className="hidden sm:inline">· Instant Render</span>
+                <div className="flex items-center gap-3">
+                  {/* Slide Indicator Dots */}
+                  <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/15">
+                    {HERO_SLIDES.map((slide, idx) => (
+                      <button
+                        key={`indicator-${slide.id}`}
+                        onClick={() => goToSlide(idx)}
+                        aria-label={`Slide ${idx + 1}: ${slide.region}`}
+                        className={`h-2 rounded-full transition-all cursor-pointer ${
+                          currentSlideIndex === idx
+                            ? "w-6 bg-[#FFE8A3]"
+                            : "w-2 bg-white/40 hover:bg-white/80"
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs font-mono text-white/90 drop-shadow">
+                    <span className="hidden sm:inline text-[#FFE8A3]">✦</span>
+                    <span className="font-semibold">{activeSlide.region}:</span>
+                    <span className="text-white/80 max-w-[220px] truncate hidden md:inline">
+                      {activeSlide.title}
+                    </span>
+                  </div>
                 </div>
-                <button
-                  onClick={() =>
-                    onGetStarted({
-                      image_id: demoTheme.name,
-                      daily: demoTasks,
-                      weekly: demoWeekly,
-                    })
-                  }
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#FFE8A3] text-[#151D4D] text-xs font-bold hover:bg-white transition-all shadow-md"
-                >
-                  <span>Edit in Studio Generator</span>
-                  <span>→</span>
-                </button>
+
+                <div className="flex items-center gap-2.5">
+                  <button
+                    onClick={() => {
+                      const nextRandom = Math.floor(Math.random() * HERO_SLIDES.length);
+                      goToSlide(nextRandom);
+                    }}
+                    title="Random Background"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-black/40 hover:bg-black/60 text-white text-xs font-semibold backdrop-blur-md border border-white/20 transition-all cursor-pointer"
+                  >
+                    <span>🎲</span>
+                    <span className="hidden sm:inline">Shuffle</span>
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      onGetStarted({
+                        image_id: activeSlide.name,
+                        daily: demoTasks,
+                        weekly: demoWeekly,
+                      })
+                    }
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#FFE8A3] text-[#151D4D] text-xs font-bold hover:bg-white transition-all shadow-md group/btn cursor-pointer"
+                  >
+                    <span>Edit in Studio Generator</span>
+                    <span className="group-hover/btn:translate-x-0.5 transition-transform">→</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -671,12 +908,18 @@ const LandingPage = ({
                 <div
                   className={`h-40 bg-gradient-to-tr ${card.color} p-5 flex flex-col justify-between relative overflow-hidden`}
                 >
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                  <img
+                    src={getImageUrl(card.file)}
+                    onError={(e) => handleImageError(e, card.file)}
+                    alt={card.name}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/25 transition-colors"></div>
                   <div className="relative z-10 flex justify-between items-start">
-                    <span className="text-[10px] font-mono uppercase px-2.5 py-1 rounded bg-black/40 text-white font-bold backdrop-blur-sm">
+                    <span className="text-[10px] font-mono uppercase px-2.5 py-1 rounded bg-black/50 text-white font-bold backdrop-blur-sm">
                       {card.region}
                     </span>
-                    <span className="text-xs text-[#FFE8A3] font-mono font-bold">
+                    <span className="text-xs text-[#FFE8A3] font-mono font-bold drop-shadow">
                       4K UHD
                     </span>
                   </div>

@@ -462,6 +462,7 @@ const App = () => {
       {currentPage === "landing" ? (
         /* ─── PAGE 1: LANDING PAGE ─── */
         <LandingPage
+          backendUrl={BACKEND_URL}
           onGetStarted={handleGetStarted}
           onApplyPreset={handleApplyPreset}
           isAuthenticated={isAuthenticated}
