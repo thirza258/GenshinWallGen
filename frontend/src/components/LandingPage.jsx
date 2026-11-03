@@ -412,107 +412,158 @@ const LandingPage = ({
 
       {/* ─── HERO SECTION ─── */}
       <section className="relative overflow-hidden pt-12 pb-20 sm:pt-16 sm:pb-28">
-        {/* ─── HERO AMBIENT BACKGROUND SLIDESHOW ─── */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
+        {/* ─── HERO BACKGROUND SLIDESHOW (DIRECTLY BEHIND HERO TEXT & BANNER) ─── */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">
           {HERO_SLIDES.map((slide, idx) => (
             <div
               key={`hero-bg-${slide.id}`}
-              className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
                 idx === currentSlideIndex
-                  ? "opacity-35 scale-105"
-                  : "opacity-0 scale-100 pointer-events-none"
+                  ? "opacity-100"
+                  : "opacity-0 pointer-events-none"
               }`}
             >
               <img
                 src={getImageUrl(slide.name)}
                 onError={(e) => handleImageError(e, slide.name)}
-                alt=""
-                className="w-full h-full object-cover blur-3xl transform brightness-90 saturate-125"
+                alt={slide.title}
+                className="w-full h-full object-cover object-center transform transition-transform duration-[7000ms] ease-out brightness-95"
               />
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${slide.ambientGlow} mix-blend-multiply`}
-              ></div>
             </div>
           ))}
 
-          {/* Warm Vignette & Readability Gradient Layers */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#FDE7CE]/90 via-[#FDE7CE]/70 to-[#FDE7CE]"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-[#FDE7CE]/40 to-[#FDE7CE]"></div>
+          {/* Cinematic Scrim: deep navy/black scrim on top for crisp typography, smooth gradient fade to page at bottom */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070B1F]/80 via-[#0D1438]/65 to-[#FDE7CE]"></div>
         </div>
 
         {/* Subtle Decorative Stars */}
-        <div className="absolute top-10 left-10 text-[#C58B35]/40 text-2xl animate-twinkle select-none pointer-events-none">
+        <div className="absolute top-10 left-10 text-[#FFE8A3]/50 text-2xl animate-twinkle select-none pointer-events-none z-10">
           ✦
         </div>
-        <div className="absolute top-36 right-16 text-[#C58B35]/30 text-3xl animate-twinkle select-none pointer-events-none delay-500">
+        <div className="absolute top-36 right-16 text-[#FFE8A3]/40 text-3xl animate-twinkle select-none pointer-events-none delay-500 z-10">
           ✧
         </div>
-        <div className="absolute bottom-20 left-1/4 text-[#151D4D]/20 text-xl animate-twinkle select-none pointer-events-none delay-1000">
+        <div className="absolute bottom-20 left-1/4 text-white/20 text-xl animate-twinkle select-none pointer-events-none delay-1000 z-10">
           ✦
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8">
           <div className="text-center max-w-3xl mx-auto space-y-6">
             {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#151D4D]/10 border border-[#151D4D]/20 text-xs font-semibold tracking-wide text-[#151D4D]">
-              <span className="text-[#C58B35]">✦</span>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold tracking-wide text-[#FFE8A3] shadow-md">
+              <span className="text-[#FFE8A3]">✦</span>
               <span>The Free Genshin Impact Daily Task Wallpaper Studio</span>
             </div>
 
             {/* Main H1 Headline for SEO & UX */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#151D4D] leading-[1.15]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#FFFCF3] leading-[1.15] drop-shadow-lg">
               Turn Your Daily Routine into{" "}
-              <span className="relative inline-block text-[#C58B35]">
+              <span className="relative inline-block text-[#FFE8A3] drop-shadow-md">
                 Aesthetic 4K Wallpapers
-                <span className="absolute left-0 bottom-1 w-full h-1 bg-[#C58B35]/30 rounded-full"></span>
+                <span className="absolute left-0 bottom-1 w-full h-1 bg-[#FFE8A3]/40 rounded-full"></span>
               </span>
             </h1>
 
             {/* Subheading */}
-            <p className="text-base sm:text-lg text-[#151D4D]/80 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-[#FFFCF3]/90 leading-relaxed max-w-2xl mx-auto font-medium drop-shadow">
               Overlay your daily commissions, weekly boss drops, resin reminders,
               and farming notes directly onto official high-res Genshin artwork.
               Stay organized, save banner wishes, and elevate your desktop setup.
             </p>
 
+            {/* Hero Background Slideshow Controller */}
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-1 pb-1">
+              <div className="inline-flex items-center gap-1.5 p-1.5 rounded-xl bg-black/45 backdrop-blur-md border border-white/25 shadow-xl">
+                <button
+                  type="button"
+                  onClick={prevSlide}
+                  title="Previous Wallpaper"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all cursor-pointer text-base font-bold"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsPlaying((p) => !p)}
+                  title={isPlaying ? "Pause slideshow" : "Play slideshow"}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono text-[#FFE8A3] hover:bg-white/20 transition-all cursor-pointer"
+                >
+                  <span>{isPlaying ? "⏸" : "▶"}</span>
+                  <span className="hidden sm:inline text-[11px] font-semibold">{isPlaying ? "Pause" : "Play"}</span>
+                </button>
+                <div className="h-4 w-px bg-white/25 mx-0.5"></div>
+                <div className="flex items-center gap-1 overflow-x-auto py-0.5 max-w-[280px] sm:max-w-none">
+                  {HERO_SLIDES.map((slide, idx) => (
+                    <button
+                      key={`hero-switcher-${slide.id}`}
+                      type="button"
+                      onClick={() => goToSlide(idx)}
+                      className={`px-3 py-1 text-xs rounded-lg font-semibold transition-all shrink-0 cursor-pointer ${
+                        currentSlideIndex === idx
+                          ? "bg-[#FFE8A3] text-[#151D4D] shadow-md font-bold scale-105"
+                          : "text-white/85 hover:text-white hover:bg-white/20"
+                      }`}
+                    >
+                      {slide.label}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={nextSlide}
+                  title="Next Wallpaper"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all cursor-pointer text-base font-bold"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
+
+            {/* Active Wallpaper Info Tag */}
+            <div className="text-xs font-mono text-white/85 drop-shadow flex items-center justify-center gap-2">
+              <span className="text-[#FFE8A3]">✦</span>
+              <span className="font-semibold text-[#FFE8A3]">{activeSlide.region}:</span>
+              <span className="text-white/90 max-w-[320px] truncate">{activeSlide.title}</span>
+            </div>
+
             {/* Primary Action Buttons */}
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
               <button
-                onClick={() => onGetStarted()}
+                onClick={() => onGetStarted({ image_id: activeSlide.name })}
                 id="hero-get-started-btn"
-                className="flex items-center gap-2.5 px-8 py-4 rounded-xl bg-gradient-to-r from-[#151D4D] via-[#1A2560] to-[#0A102E] text-[#FFFCF3] text-base font-bold shadow-xl shadow-[#151D4D]/30 hover:shadow-2xl hover:-translate-y-1 active:translate-y-0 transition-all group"
+                className="flex items-center gap-2.5 px-8 py-4 rounded-xl bg-gradient-to-r from-[#FFE8A3] via-[#FCE38A] to-[#E3C565] text-[#151D4D] text-base font-bold shadow-xl shadow-black/30 hover:shadow-2xl hover:-translate-y-1 active:translate-y-0 transition-all group cursor-pointer"
               >
                 <span>Launch Generator Free</span>
-                <span className="text-[#FFE8A3] group-hover:translate-x-1 transition-transform">
+                <span className="text-[#151D4D] group-hover:translate-x-1 transition-transform">
                   →
                 </span>
               </button>
 
               <a
                 href="#showcase"
-                className="flex items-center gap-2 px-6 py-4 rounded-xl bg-[#FFFCF3] border border-black/15 text-[#151D4D] text-base font-semibold hover:bg-black/5 transition-all shadow-sm"
+                className="flex items-center gap-2 px-6 py-4 rounded-xl bg-white/15 backdrop-blur-md border border-white/30 text-[#FFFCF3] text-base font-semibold hover:bg-white/25 transition-all shadow-md"
               >
                 <span>Explore Wallpapers</span>
                 <span className="text-sm">↓</span>
               </a>
-              <button onClick={onOpenPixelStudio} id="hero-pixel-studio-btn" className="flex items-center gap-2 px-6 py-4 rounded-xl bg-[#E3E9D7] border border-[#AFBC96] text-[#3B5037] text-base font-semibold hover:bg-[#D6E1C7] transition-all shadow-sm">
+              <button onClick={onOpenPixelStudio} id="hero-pixel-studio-btn" className="flex items-center gap-2 px-6 py-4 rounded-xl bg-[#E3E9D7] border border-[#AFBC96] text-[#3B5037] text-base font-semibold hover:bg-[#D6E1C7] transition-all shadow-sm cursor-pointer">
                 <span>▦</span> Create Pixel Art <span>→</span>
               </button>
             </div>
 
             {/* Trust Points */}
-            <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-6 pt-4 text-xs font-semibold text-[#151D4D]/75">
+            <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-6 pt-4 text-xs font-bold text-white/95 drop-shadow-md">
               <span className="flex items-center gap-1.5">
-                <span className="text-emerald-700">✓</span> 100% Free Forever
+                <span className="text-emerald-400 font-extrabold">✓</span> 100% Free Forever
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="text-emerald-700">✓</span> 50+ Official 4K Artworks
+                <span className="text-emerald-400 font-extrabold">✓</span> 50+ Official 4K Artworks
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="text-emerald-700">✓</span> Instant Anonymous Mode
+                <span className="text-emerald-400 font-extrabold">✓</span> Instant Anonymous Mode
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="text-emerald-700">✓</span> Multi-Monitor Ready
+                <span className="text-emerald-400 font-extrabold">✓</span> Multi-Monitor Ready
               </span>
             </div>
           </div>
