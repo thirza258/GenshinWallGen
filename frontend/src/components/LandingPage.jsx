@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const FAQ_ITEMS = [
   {
@@ -197,8 +197,6 @@ const HERO_SLIDES = [
     accentColor: "#7DD3FC",
   },
 ];
-
-const DEMO_THEMES = HERO_SLIDES;
 
 const SLIDE_DURATION = 5500; // 5.5 seconds per slide
 
@@ -470,54 +468,6 @@ const LandingPage = ({
               and farming notes directly onto official high-res Genshin artwork.
               Stay organized, save banner wishes, and elevate your desktop setup.
             </p>
-
-            {/* Hero Background Slideshow Controller */}
-            <div className="flex flex-wrap items-center justify-center gap-2 pt-1 pb-1">
-              <div className="inline-flex items-center gap-1.5 p-1.5 rounded-xl bg-black/45 backdrop-blur-md border border-white/25 shadow-xl">
-                <button
-                  type="button"
-                  onClick={prevSlide}
-                  title="Previous Wallpaper"
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all cursor-pointer text-base font-bold"
-                >
-                  ‹
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsPlaying((p) => !p)}
-                  title={isPlaying ? "Pause slideshow" : "Play slideshow"}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono text-[#FFE8A3] hover:bg-white/20 transition-all cursor-pointer"
-                >
-                  <span>{isPlaying ? "⏸" : "▶"}</span>
-                  <span className="hidden sm:inline text-[11px] font-semibold">{isPlaying ? "Pause" : "Play"}</span>
-                </button>
-                <div className="h-4 w-px bg-white/25 mx-0.5"></div>
-                <div className="flex items-center gap-1 overflow-x-auto py-0.5 max-w-[280px] sm:max-w-none">
-                  {HERO_SLIDES.map((slide, idx) => (
-                    <button
-                      key={`hero-switcher-${slide.id}`}
-                      type="button"
-                      onClick={() => goToSlide(idx)}
-                      className={`px-3 py-1 text-xs rounded-lg font-semibold transition-all shrink-0 cursor-pointer ${
-                        currentSlideIndex === idx
-                          ? "bg-[#FFE8A3] text-[#151D4D] shadow-md font-bold scale-105"
-                          : "text-white/85 hover:text-white hover:bg-white/20"
-                      }`}
-                    >
-                      {slide.label}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={nextSlide}
-                  title="Next Wallpaper"
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-all cursor-pointer text-base font-bold"
-                >
-                  ›
-                </button>
-              </div>
-            </div>
 
             {/* Active Wallpaper Info Tag */}
             <div className="text-xs font-mono text-white/85 drop-shadow flex items-center justify-center gap-2">
